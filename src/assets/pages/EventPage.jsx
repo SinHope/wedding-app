@@ -45,6 +45,8 @@ const EventPage = () => {
                 .from("posts")
                 .select()
                 .eq('event_id', eventData.id)
+                .order('created_at', { ascending: false }); // latest first
+
 
             if (postData) {
                 console.log(postData)
@@ -64,8 +66,8 @@ const EventPage = () => {
     }, [slug])
 
 
-    useEffect(()=>{
-        if(!loading){
+    useEffect(() => {
+        if (!loading) {
             feather.replace()
         }
     }, [loading])

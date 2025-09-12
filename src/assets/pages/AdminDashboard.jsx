@@ -2,6 +2,7 @@ import React from 'react'
 import { useState, useEffect } from 'react'
 import supabase from '../../config/supabaseClient'
 import { Plus } from 'react-feather';
+import { Link } from 'react-router-dom';
 
 
 
@@ -71,7 +72,10 @@ const AdminDashboard = () => {
                             return <tr key={item.id}>
                                 <td>{index + 1}</td>
                                 <td>
-                                    <a href={`/event/${item.slug}`}>{item.name}</a>
+                                    {/* <a href={`/event/${item.slug}`}>{item.name}</a> */}
+                                    <Link to={`/event/${item.slug}`} className="text-decoration-none">
+                                        {item.name}
+                                    </Link>
 
                                 </td>
                                 <td>{new Date(item.event_date).toLocaleDateString("en-US", {

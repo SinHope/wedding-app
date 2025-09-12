@@ -5,7 +5,6 @@ import { useAppContext } from "./AppContext";
 function ProtectedRoute({ children }) {
 
   const {session} = useAppContext()
-  console.log(session)
 
   if (!session?.user) {
     // 🚨 Not logged in → redirect to login
