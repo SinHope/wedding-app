@@ -11,7 +11,6 @@ export function AppProvider({ children }) {
     async function getSession() {
         //retrieve a session
         const { data, error } = await supabase.auth.getSession()
-        console.log(data.session)
         setSession(data.session)
     }
 
@@ -29,7 +28,6 @@ export function AppProvider({ children }) {
 
         // Listen for auth state changes
         const { data: listener } = supabase.auth.onAuthStateChange((event, session) => {
-            console.log("event", event, "session", session)
             setSession(session)
         })
 
