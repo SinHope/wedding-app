@@ -80,6 +80,10 @@ const EventPage = () => {
         )
     }
 
+    const date = new Date(event.event_date)
+    const options = { day: "2-digit", month: "long", year: "numeric" };
+    const formattedDate = date.toLocaleDateString("en-GB", options);
+
     return (
         <div className='py-3' style={{ backgroundColor: '#F0E5DA' }}>
 
@@ -88,7 +92,8 @@ const EventPage = () => {
                 <EventCarousel postDataArray={postDataArray} />
 
                 <div className='text-center mt-3'>
-                    <h4>{event.name}</h4>
+                    <h1>{event.name}</h1>
+                    <h3 className='mt-2'>{formattedDate}</h3>
                 </div>
 
                 <div className='d-grid gap-2 my-5 col-12 col-sm-6 col-md-2 ms-sm-auto'>
