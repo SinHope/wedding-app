@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState, useRef } from 'react'
 import { useParams } from 'react-router-dom'
 import supabase from '../../config/supabaseClient'
 import { useNavigate } from 'react-router-dom'
@@ -6,24 +6,18 @@ import ErrorPage from './ErrorPage'
 import { NavLink } from 'react-router-dom';
 import feather from "feather-icons";
 import Carousel from "react-bootstrap/Carousel";
-
 import { ClockLoader } from "react-spinners";
+import ModalCreatePost from '../components/ModalCreatePost'
+import EventCarousel from '../components/EventCarousel'
 
 const EventPage = () => {
 
     const { slug } = useParams()
     const navigate = useNavigate()
 
-    const [eventsList, setEventsList] = useState([])
     const [event, setEvent] = useState('')
     const [postDataArray, setPostDataArray] = useState([])
-
-    const [loading, setLoading] = useState('true')
-
-    const postHandler = () => {
-        console.log('create a post button clicked')
-    }
-
+    const [loading, setLoading] = useState(true)
 
     const fetchEventAndPosts = async () => {
         const { data: eventData, error: errorEvent } = await supabase
@@ -38,7 +32,6 @@ const EventPage = () => {
         }
 
         if (eventData) {
-            console.log(eventData)
             setEvent(eventData)
 
             const { data: postData, error: errorPost } = await supabase
@@ -49,7 +42,6 @@ const EventPage = () => {
 
 
             if (postData) {
-                console.log(postData)
                 setPostDataArray(postData)
                 setLoading(false)
             }
@@ -62,7 +54,9 @@ const EventPage = () => {
     }
 
     useEffect(() => {
+        document.title = slug
         fetchEventAndPosts()
+
     }, [slug])
 
 
@@ -72,11 +66,11 @@ const EventPage = () => {
         }
     }, [loading])
 
-    // if (!eventsList.includes(slug)) {
-    //     console.log(" No page found")
-    //     // navigate('*')
-    //     return <ErrorPage />
-    // }
+    const [showModal, setShowModal] = useState(false);
+    const handleShow = () => setShowModal(true);
+    const handleClose = () => setShowModal(false);
+
+
 
     if (loading) {
         return (
@@ -86,80 +80,92 @@ const EventPage = () => {
         )
     }
 
-
     return (
-        <div className='container mt-3'>
-            <div className='d-flex justify-content-between align-items-center'>
-                <div>
-                    {event.name}
+        <div className='py-3' style={{ backgroundColor: '#F0E5DA' }}>
+
+            <div className='container mx-auto'>
+
+                <EventCarousel postDataArray={postDataArray} />
+
+                <div className='text-center mt-3'>
+                    <h4>{event.name}</h4>
                 </div>
 
-                <div>
-                    <NavLink to={`/create/${slug}`} className="btn btn-primary">
-                        <i data-feather="plus"></i>
-                    </NavLink>
+                <div className='d-grid gap-2 my-5 col-12 col-sm-6 col-md-2 ms-sm-auto'>
+                    <button className='btn btn-light w-100 d-flex justify-content-center btn-outline-secondary' onClick={handleShow}>
+                        <i className='' data-feather="plus"></i>
+                        <span className=''>Create Post</span>
+                    </button>
                 </div>
-            </div>
 
-            <div className="">
 
-                {postDataArray.length === 0 && (
-                    <div className="text-center mt-4">No messages posted yet.</div>
-                )}
+                <ModalCreatePost show={showModal} handleClose={handleClose} setShowModal={setShowModal} fetchEventAndPosts={fetchEventAndPosts} />
 
-                {postDataArray.map((item, index) => (
-                    <div
-                        key={index}
-                        className="card my-3 shadow-sm"
-                        style={{ maxWidth: "500px", margin: "0 auto" }} // IG-style centered post
-                    >
-                        {/* Header */}
-                        <div className="card-header d-flex align-items-center">
-                            <strong>{item.name}</strong>
-                        </div>
+                <div className="">
 
-                        {/* Photo */}
-                        {item.photos?.length > 1 && <Carousel>
-                            {item.photos.map((photo, idx) => (
-                                <Carousel.Item key={idx}>
-                                    <img
-                                        className="d-block w-100"
-                                        src={photo}
-                                        alt={`Slide ${idx + 1}`}
-                                        style={{
-                                            maxHeight: "400px",
-                                            objectFit: "cover",
-                                        }}
-                                    />
-                                </Carousel.Item>
-                            ))}
-                        </Carousel>}
+                    {postDataArray.length === 0 && (
+                        <div className="text-center mt-4">No messages posted yet.</div>
+                    )}
 
-                        {item.photos?.length === 1 &&
-                            <img
-                                src={item.photos[0]}
-                                alt={item.name}
-                                style={{
-                                    width: "100%",
-                                    height: "400px",
-                                    objectFit: "cover",
-                                }}
-                            />
-                        }
-
-                        {item.photos?.length === 0 &&
-                            <div>
-                                No photos uploaded
+                    {postDataArray.map((item, index) => (
+                        <div
+                            key={index}
+                            className="card my-3 shadow-sm"
+                            style={{ maxWidth: "500px", margin: "0 auto" }} // IG-style centered post
+                        >
+                            {/* Header */}
+                            <div className="card-header d-flex align-items-center">
+                                <strong>{item.name}</strong>
                             </div>
-                        }
 
-                        {/* Message */}
-                        <div className="card-body">
-                            <p className="card-text">{item.message}</p>
+                            {/* Photo */}
+                            {item.photos?.length > 1 && <Carousel>
+                                {item.photos.map((photo, idx) => (
+                                    <Carousel.Item key={idx}>
+                                        <img
+                                            className="d-block w-100"
+                                            src={photo}
+                                            alt={`Slide ${idx + 1}`}
+                                            style={{
+                                                maxHeight: "400px",
+                                                objectFit: "cover",
+                                            }}
+                                        />
+                                    </Carousel.Item>
+                                ))}
+                            </Carousel>}
+
+                            {item.photos?.length === 1 &&
+                                <img
+                                    src={item.photos[0]}
+                                    alt={item.name}
+                                    style={{
+                                        width: "100%",
+                                        height: "400px",
+                                        objectFit: "cover",
+                                    }}
+                                />
+                            }
+
+                            {item.photos?.length === 0 &&
+                                <div>
+                                    No photos uploaded
+                                </div>
+                            }
+
+                            {/* Message */}
+                            <div className="card-body">
+                                <p className="card-text">{item.message}</p>
+                            </div>
                         </div>
-                    </div>
-                ))}
+                    ))}
+                </div>
             </div>
+
+
+
+
+
 
         </div>
     )

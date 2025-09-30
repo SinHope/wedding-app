@@ -22,7 +22,7 @@ function App({ session }) {
 
   return (
     <>
-      <div>
+      <div className=''>
         <AppProvider>
           <AppNavbar />
 
