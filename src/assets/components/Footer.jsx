@@ -1,7 +1,15 @@
 import React from "react";
 import { Link } from "react-router-dom";
 
+import { useLocation } from "react-router-dom";
+
 const Footer = () => {
+
+    const location = useLocation()
+
+    const isEventPage = location.pathname.startsWith("/event/")
+
+
     return (
         // <footer className="d-flex flex-wrap justify-content-between align-items-center py-3 border-top">
         //     <div className="col-md-4 d-flex align-items-center">
@@ -24,7 +32,8 @@ const Footer = () => {
 
         // </footer>
 
-        <footer className="d-flex flex-wrap justify-content-between align-items-center py-3 border-top bg-light container">
+
+        <footer className="d-flex flex-wrap justify-content-between align-items-center py-3 border-top bg-light px-3">
             {/* Left side: logo + copyright */}
             <div className="col-md-4 d-flex align-items-center">
                 <span className="mb-md-0 text-muted">
@@ -33,13 +42,14 @@ const Footer = () => {
             </div>
 
             {/* Right side: links */}
-            <ul className="nav">
+            {isEventPage && <ul className="nav">
                 <li className="nav-item">
                     <Link to="/contact" className="btn btn-outline-primary btn-sm">
                         Enquire Here
                     </Link>
                 </li>
-            </ul>
+            </ul>}
+
         </footer>
 
     );
