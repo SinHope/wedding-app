@@ -17,14 +17,20 @@ import ProtectedRoute from './assets/components/ProtectedRoute';
 import { AppProvider } from './assets/components/AppContext';
 import Footer from './assets/components/Footer';
 
+import { useLocation } from 'react-router-dom';
+
 
 function App({ session }) {
+
+  const location = useLocation()
+
+  const isEventPage = location.pathname.startsWith("/event/")
 
   return (
     <>
       <div className=''>
         <AppProvider>
-          <AppNavbar />
+          {!isEventPage && <AppNavbar />}
 
           <Routes>
             <Route path="/" element={<Home />} />

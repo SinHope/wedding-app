@@ -39,17 +39,18 @@ function AppNavbar() {
                         <Nav.Link as={NavLink} to="/" end onClick={() => setExpanded(false)}>
                             Home
                         </Nav.Link>
-                        {/* <Nav.Link as={NavLink} to="/contact" onClick={() => setExpanded(false)}>
+                        
+                        <Nav.Link as={NavLink} to="/contact" onClick={() => setExpanded(false)}>
                             Contact
-                        </Nav.Link> */}
+                        </Nav.Link>
 
                         <Nav.Link as={NavLink} to='/about-us' onClick={() => setExpanded(false)}>
                             About Us
                         </Nav.Link>
 
-                        {!session && <Nav.Link as={NavLink} to="/login" onClick={() => setExpanded(false)}>
+                        {/* {!session && <Nav.Link as={NavLink} to="/login" onClick={() => setExpanded(false)}>
                             Login (Admin)
-                        </Nav.Link>}
+                        </Nav.Link>} */}
 
                         {/* {!session && <Nav.Link as={NavLink} to="/register" onClick={() => setExpanded(false)}>
                             Register

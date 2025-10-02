@@ -9,6 +9,7 @@ import Carousel from "react-bootstrap/Carousel";
 import { ClockLoader } from "react-spinners";
 import ModalCreatePost from '../components/ModalCreatePost'
 import EventCarousel from '../components/EventCarousel'
+import EventHeader from '../components/EventHeader'
 
 const EventPage = () => {
 
@@ -18,6 +19,9 @@ const EventPage = () => {
     const [event, setEvent] = useState('')
     const [postDataArray, setPostDataArray] = useState([])
     const [loading, setLoading] = useState(true)
+
+    //for array post photo length more than 3 at least. if there are 3, do not show carousel
+    const [showCarousel, setShowCarousel] = useState(false)
 
     const fetchEventAndPosts = async () => {
         const { data: eventData, error: errorEvent } = await supabase
@@ -70,11 +74,27 @@ const EventPage = () => {
     const handleShow = () => setShowModal(true);
     const handleClose = () => setShowModal(false);
 
+    useEffect(() => {
+        if (postDataArray.length > 5) {
+            let count = 0
 
+            for (const item of postDataArray) {
+                if (item.photos && item.photos.length > 0) {
+                    count++
+                }
+
+                if (count > 5) {
+                    setShowCarousel(true)
+                    break
+                }
+            }
+
+        }
+    }, [postDataArray])
 
     if (loading) {
         return (
-            <div className="d-flex justify-content-center mt-5">
+            <div className="d-flex justify-content-center my-5">
                 <ClockLoader />
             </div>
         )
@@ -84,12 +104,21 @@ const EventPage = () => {
     const options = { day: "2-digit", month: "long", year: "numeric" };
     const formattedDate = date.toLocaleDateString("en-GB", options);
 
+
     return (
-        <div className='py-3' style={{ backgroundColor: '#F0E5DA' }}>
+        <div className='' style={{ backgroundColor: '#F0E5DA' }}>
 
-            <div className='container mx-auto'>
+            {/* <EventHeader event={event} /> */}
 
-                <EventCarousel postDataArray={postDataArray} />
+            {/* cover image */}
+
+            <div>
+                <img src={event.cover_image} className='img-fluid w-100' style={{maxHeight:"600px", minHeight:"400px", objectFit: "cover"}} alt="" />
+            </div>
+
+            <div className='container mx-auto py-4'>
+
+                {/* {showCarousel && <EventCarousel postDataArray={postDataArray} />} */}
 
                 <div className='text-center mt-3'>
                     <h1>{event.name}</h1>
@@ -99,7 +128,7 @@ const EventPage = () => {
                 <div className='d-grid gap-2 my-5 col-12 col-sm-6 col-md-2 ms-sm-auto'>
                     <button className='btn btn-light w-100 d-flex justify-content-center btn-outline-secondary' onClick={handleShow}>
                         <i className='' data-feather="plus"></i>
-                        <span className=''>Create Post</span>
+                        <span className='text-dark'>Create Post</span>
                     </button>
                 </div>
 
