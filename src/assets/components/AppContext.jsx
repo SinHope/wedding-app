@@ -7,11 +7,15 @@ const AppContext = createContext(null) //to create the context so that we can us
 
 export function AppProvider({ children }) {
     const [session, setSession] = useState(null)
+    const [loading, setLoading] = useState(true) // 👈 new state
+
 
     async function getSession() {
         //retrieve a session
         const { data, error } = await supabase.auth.getSession()
         setSession(data.session)
+        setLoading(false) // ✅ stop loading after fetching session
+
     }
 
     async function logout() {
@@ -36,7 +40,7 @@ export function AppProvider({ children }) {
     }, [])
 
     return (
-        <AppContext.Provider value={{ session, setSession, logout }}>
+        <AppContext.Provider value={{ session, setSession, logout, loading }}>
             {children}
         </AppContext.Provider>
     )

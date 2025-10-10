@@ -24,7 +24,7 @@ function AppNavbar() {
     return (
 
         <Navbar expanded={expanded} expand="lg" className="bg-body-tertiary">
-            <Container>
+            <Container fluid='lg'>
                 <Navbar.Brand as={NavLink} to="/" end>
                     Manganui
                 </Navbar.Brand>

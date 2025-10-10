@@ -108,13 +108,10 @@ const EventPage = () => {
     return (
         <div className='' style={{ backgroundColor: '#F0E5DA' }}>
 
-            {/* <EventHeader event={event} /> */}
-
             {/* cover image */}
-
-            <div>
-                <img src={event.cover_image} className='img-fluid w-100' style={{maxHeight:"600px", minHeight:"400px", objectFit: "cover"}} alt="" />
-            </div>
+            {event.cover_image && <div>
+                <img src={event.cover_image} className='img-fluid w-100' style={{ maxHeight: "600px", minHeight: "400px", objectFit: "cover" }} alt="" />
+            </div>}
 
             <div className='container mx-auto py-4'>
 
@@ -138,7 +135,9 @@ const EventPage = () => {
                 <div className="">
 
                     {postDataArray.length === 0 && (
-                        <div className="text-center mt-4">No messages posted yet.</div>
+                        <div className="text-center mt-4">
+                            No messages posted yet. Lets start posting!
+                        </div>
                     )}
 
                     {postDataArray.map((item, index) => (
@@ -152,8 +151,8 @@ const EventPage = () => {
                                 <strong>{item.name}</strong>
                             </div>
 
-                            {/* Photo */}
-                            {item.photos?.length > 1 && <Carousel>
+                            {/* multiple Photo */}
+                            {/* {item.photos?.length > 1 && <Carousel>
                                 {item.photos.map((photo, idx) => (
                                     <Carousel.Item key={idx}>
                                         <img
@@ -161,15 +160,48 @@ const EventPage = () => {
                                             src={photo}
                                             alt={`Slide ${idx + 1}`}
                                             style={{
-                                                maxHeight: "400px",
-                                                objectFit: "cover",
+                                                height: "400px",
+                                                objectFit: "contain",
                                             }}
                                         />
                                     </Carousel.Item>
                                 ))}
-                            </Carousel>}
+                            </Carousel>} */}
 
-                            {item.photos?.length === 1 &&
+                            {/* Multiple media in carousel */}
+                            {item.photos?.length > 1 && (
+                                <Carousel>
+                                    {item.photos.map((media, idx) => (
+                                        <Carousel.Item key={idx}>
+                                            {media.match(/\.(mp4|webm|ogg|mov)$/i) ? (
+                                                <video
+                                                    src={media}
+                                                    controls
+                                                    style={{
+                                                        width: "100%",
+                                                        height: "400px",
+                                                        objectFit: "contain",
+                                                        backgroundColor: "#000"
+                                                    }}
+                                                />
+                                            ) : (
+                                                <img
+                                                    className="d-block w-100"
+                                                    src={media}
+                                                    alt={`Slide ${idx + 1}`}
+                                                    style={{
+                                                        height: "400px",
+                                                        objectFit: "contain",
+                                                    }}
+                                                />
+                                            )}
+                                        </Carousel.Item>
+                                    ))}
+                                </Carousel>
+                            )}
+
+                            {/* single photo upload */}
+                            {/* {item.photos?.length === 1 &&
                                 <img
                                     src={item.photos[0]}
                                     alt={item.name}
@@ -179,7 +211,36 @@ const EventPage = () => {
                                         objectFit: "cover",
                                     }}
                                 />
-                            }
+                            } */}
+
+                            {/* single file upload, image or video */}
+                            {/* Single media (photo or video) */}
+                            {item.photos?.length === 1 && (
+                                <>
+                                    {item.photos[0].match(/\.(mp4|webm|ogg|mov)$/i) ? (
+                                        <video
+                                            src={item.photos[0]}
+                                            controls
+                                            style={{
+                                                width: "100%",
+                                                maxHeight: "400px",
+                                                objectFit: "contain",
+                                                backgroundColor: "#000"
+                                            }}
+                                        />
+                                    ) : (
+                                        <img
+                                            src={item.photos[0]}
+                                            alt={item.name}
+                                            style={{
+                                                width: "100%",
+                                                height: "400px",
+                                                objectFit: "cover",
+                                            }}
+                                        />
+                                    )}
+                                </>
+                            )}
 
                             {item.photos?.length === 0 &&
                                 <div>

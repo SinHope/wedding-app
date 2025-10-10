@@ -7,7 +7,7 @@ import { useParams } from 'react-router-dom'
 import Create from '../pages/Create';
 
 
-const ModalCreatePost = ({ show, handleClose, setShowModal, fetchEventAndPosts }) => {
+const ModalCreatePost = ({ show, handleClose, setShowModal, fetchEventAndPosts, slug }) => {
 
     return (
         <Modal
@@ -22,7 +22,7 @@ const ModalCreatePost = ({ show, handleClose, setShowModal, fetchEventAndPosts }
                     <Modal.Title>Create Post</Modal.Title>
                 </Modal.Header>
                 <Modal.Body>
-                    <Create setShowModal={setShowModal} fetchEventAndPosts={fetchEventAndPosts} />
+                    <Create setShowModal={setShowModal} fetchEventAndPosts={fetchEventAndPosts}/>
                 </Modal.Body>
             </div>
 

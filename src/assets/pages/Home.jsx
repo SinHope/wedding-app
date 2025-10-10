@@ -46,7 +46,7 @@ const Home = () => {
 
             {/* Call To Action Section */}
             <section
-                className="text-center py-5 container"
+                className="text-center py-5 px-3"
                 style={{ background: "#5A3E36", color: "#fff" }}
             >
                 <h2 className="fw-bold">Make Your Wedding Memories Last Forever</h2>

@@ -1,10 +1,19 @@
 import { Navigate } from "react-router-dom";
 import { useAppContext } from "./AppContext";
+import { ClockLoader } from "react-spinners";
 
 
 function ProtectedRoute({ children }) {
 
-  const {session} = useAppContext()
+  const { session, loading } = useAppContext()
+
+  if (loading) {
+    return (
+      <div className='d-flex justify-content-center my-5'>
+        <ClockLoader />
+      </div>
+    )
+  }
 
   if (!session?.user) {
     // 🚨 Not logged in → redirect to login

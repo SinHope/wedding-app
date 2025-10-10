@@ -5,6 +5,7 @@ import { useNavigate } from 'react-router-dom'
 import { useParams } from 'react-router-dom'
 
 import { ClockLoader } from "react-spinners";
+import Upload from '../components/Upload'
 
 
 const Create = ({ setShowModal, fetchEventAndPosts }) => {
@@ -14,6 +15,7 @@ const Create = ({ setShowModal, fetchEventAndPosts }) => {
     const [error, setError] = useState('');
     const [file, setFile] = useState([]);
     const [loading, setLoading] = useState(false)
+
 
     const [event, setEvent] = useState(null)
     const fileInputRef = useRef()
@@ -37,21 +39,31 @@ const Create = ({ setShowModal, fetchEventAndPosts }) => {
 
     }
 
-    const handleFileChange = (e) => {
-        // setFile(e.target.files[0]) //for a single file
+    // const handleFileChange = (e) => {
 
-        const validFiles = Array.from(e.target.files).filter(file => file.size <= 5 * 1024 * 1024) //to filter only less than 5mb
-        if (validFiles.length !== e.target.files.length) {
-            alert('Photo filesize is more than 5mb. Please upload less than 5mb.')
+    //     const validFiles = Array.from(e.target.files).filter(file => file.size <= 5 * 1024 * 1024) //to filter only less than 5mb
+    //     if (validFiles.length !== e.target.files.length) {
+    //         alert('One or more photo filesize is more than 5mb. Please upload photo less than 5mb.')
 
-            if (fileInputRef.current) {
-                fileInputRef.current.value = ''
-            }
+    //         if (fileInputRef.current) {
+    //             fileInputRef.current.value = ''
+    //         }
 
-            return
+    //         return
+    //     }
+    //     setFile(Array.from(e.target.files))
+    // }
+
+    const handleFileChange = (files) => {
+        const validFiles = files.filter(file => file.size <= 5 * 1024 * 1024);
+
+        if (validFiles.length !== files.length) {
+            alert('One or more photos are larger than 5MB. Please upload smaller ones.');
+            return;
         }
-        setFile(Array.from(e.target.files))
-    }
+
+        setFile(validFiles);
+    };
 
     const submitHandler = async (e) => {
         e.preventDefault()
@@ -59,13 +71,12 @@ const Create = ({ setShowModal, fetchEventAndPosts }) => {
         if (!name) {
             setError("Please insert name.")
         }
-
         setLoading(true)
 
         //1. Upload to supabase storage
         const uploadedUrls = []
         for (const f of file) {
-            const filePath = `users/${Date.now()}-${f.name}` //to provide a unique name to the file/photo
+            const filePath = `${slug}/${Date.now()}-${f.name}` //to provide a unique name to the file/photo
             console.log(filePath)
 
             const { data: uploadData, error: uploadError } = await supabase.storage
@@ -97,17 +108,15 @@ const Create = ({ setShowModal, fetchEventAndPosts }) => {
             return
         }
 
-
         setName('')
         setMessage('')
         setError(null)
         setFile(null)
 
+        setLoading(false)
         setShowModal(false)
         // navigate(`/event/${slug}`)
         fetchEventAndPosts()
-
-
     }
 
     useEffect(() => {
@@ -138,20 +147,11 @@ const Create = ({ setShowModal, fetchEventAndPosts }) => {
                 <label htmlFor="message" className='form-label mt-2'>Message*</label>
                 <input placeholder='Write your message for the couples here' className='form-control' value={message} id='message' onChange={e => setMessage(e.target.value)} required />
 
-                {/* file/photo upload */}
-                <label className="form-label mt-2" htmlFor="file">Upload Image</label>
-                <input className="form-control" ref={fileInputRef} type="file" id='file' multiple accept='image/*'
-                    onChange={handleFileChange} />
-                <div className="text-muted" style={{ fontSize: '12px' }}>
-                    Please upload clear images (JPEG/PNG) under 5MB for best results.
-                </div>
 
-                {/* Custom button to trigger file input */}
-                {error && <p style={{ color: "red" }}>{error}</p>}
 
-                <div className='d-grid col-12 col-sm-2 mx-auto'>
-                    <button type='submit' className='btn btn-primary mt-4'>Submit</button>
-                </div>
+                {!loading && <div>
+                    <Upload handleFileChange={handleFileChange} loading={loading} />
+                </div>}
 
                 {loading && (
                     <div className='d-flex justify-content-center align-items-center flex-column mt-4'>
@@ -160,22 +160,14 @@ const Create = ({ setShowModal, fetchEventAndPosts }) => {
 
                     </div>)}
 
-            </form>
+                {/* Custom button to trigger file input */}
+                {error && <p style={{ color: "red" }}>{error}</p>}
 
-            {file?.length > 0 && <div>
-                <h3 className='text-center mt-3'>Preview</h3>
-                <div className='d-flex flex-wrap justify-content-center align-items-center'>
-                    {file.map((f, index) => (
-                        <div key={index} className='m-1' >
-                            <img src={URL.createObjectURL(f)} alt="" style={{ maxWidth: "150px", }} />
-                        </div>
-
-                    ))}
+                <div className='d-grid col-12 col-sm-2 mx-auto'>
+                    <button type='submit' className='btn btn-primary mt-4'>Submit</button>
                 </div>
-            </div>}
 
-
-
+            </form>
 
 
         </div>
