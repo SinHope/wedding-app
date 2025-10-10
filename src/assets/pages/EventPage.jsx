@@ -20,9 +20,6 @@ const EventPage = () => {
     const [postDataArray, setPostDataArray] = useState([])
     const [loading, setLoading] = useState(true)
 
-    //for array post photo length more than 3 at least. if there are 3, do not show carousel
-    const [showCarousel, setShowCarousel] = useState(false)
-
     const fetchEventAndPosts = async () => {
         const { data: eventData, error: errorEvent } = await supabase
             .from("events")
@@ -74,23 +71,6 @@ const EventPage = () => {
     const handleShow = () => setShowModal(true);
     const handleClose = () => setShowModal(false);
 
-    useEffect(() => {
-        if (postDataArray.length > 5) {
-            let count = 0
-
-            for (const item of postDataArray) {
-                if (item.photos && item.photos.length > 0) {
-                    count++
-                }
-
-                if (count > 5) {
-                    setShowCarousel(true)
-                    break
-                }
-            }
-
-        }
-    }, [postDataArray])
 
     if (loading) {
         return (
@@ -170,7 +150,7 @@ const EventPage = () => {
 
                             {/* Multiple media in carousel */}
                             {item.photos?.length > 1 && (
-                                <Carousel>
+                                <Carousel interval={null}>
                                     {item.photos.map((media, idx) => (
                                         <Carousel.Item key={idx}>
                                             {media.match(/\.(mp4|webm|ogg|mov)$/i) ? (
