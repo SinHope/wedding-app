@@ -55,7 +55,7 @@ const Create = ({ setShowModal, fetchEventAndPosts }) => {
     // }
 
     const handleFileChange = (files) => {
-        const validFiles = files.filter(file => file.size <= 5 * 1024 * 1024);
+        const validFiles = files.filter(file => file.size <= 50 * 1024 * 1024);
 
         if (validFiles.length !== files.length) {
             alert('One or more photos are larger than 5MB. Please upload smaller ones.');
