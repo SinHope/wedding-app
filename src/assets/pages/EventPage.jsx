@@ -11,6 +11,7 @@ import ModalCreatePost from '../components/ModalCreatePost'
 import EventCarousel from '../components/EventCarousel'
 import EventHeader from '../components/EventHeader'
 
+
 const EventPage = () => {
 
     const { slug } = useParams()
@@ -19,6 +20,8 @@ const EventPage = () => {
     const [event, setEvent] = useState('')
     const [postDataArray, setPostDataArray] = useState([])
     const [loading, setLoading] = useState(true)
+
+    const [response, setResponse] = useState(null)
 
     const fetchEventAndPosts = async () => {
         const { data: eventData, error: errorEvent } = await supabase
@@ -54,9 +57,36 @@ const EventPage = () => {
 
     }
 
+    //testing edge functions
+    const testEdge = async () => {
+
+        try {
+            const { data, error } = await supabase.functions.invoke('swift-handler', {
+                body: { name: 'Functions' },
+            })
+
+            if (error) {
+                console.error('Error:', error)
+                return
+            }
+
+            console.log('Response from test edge function:', data)
+            setResponse(data)
+
+        } catch (error) {
+            console.error('failed to call function:', error)
+        }
+
+
+    }
+
     useEffect(() => {
         document.title = slug
         fetchEventAndPosts()
+
+        //test
+        testEdge()
+
 
     }, [slug])
 
@@ -83,6 +113,9 @@ const EventPage = () => {
     const date = new Date(event.event_date)
     const options = { day: "2-digit", month: "long", year: "numeric" };
     const formattedDate = date.toLocaleDateString("en-GB", options);
+
+
+
 
 
     return (
@@ -215,7 +248,7 @@ const EventPage = () => {
                                             style={{
                                                 width: "100%",
                                                 height: "400px",
-                                                objectFit: "cover",
+                                                objectFit: "contain",
                                             }}
                                         />
                                     )}
@@ -223,8 +256,9 @@ const EventPage = () => {
                             )}
 
                             {item.photos?.length === 0 &&
-                                <div>
-                                    No photos uploaded
+                                <div className='ms-3 mt-2'>
+                                    {/* No photos uploaded */}
+                                    Message:
                                 </div>
                             }
 
@@ -235,13 +269,19 @@ const EventPage = () => {
                         </div>
                     ))}
                 </div>
+
+                <div className='mt-4'>
+                    <h5 className='text-center'>Our Partners</h5>
+                    <div className='p-3 d-flex justify-content-center rounded' style={{ backgroundColor: 'white', width: '100%' }}>
+                        <img src="/images/MatTeko.jpg" style={{
+                            width: '30%',      // roughly 3 images per row (with small gaps)
+                            maxWidth: '200px', // keeps logos from being too big
+                            height: 'auto',    // maintain aspect ratio
+                            objectFit: 'contain',
+                        }} alt="Mat Teko" />
+                    </div>
+                </div>
             </div>
-
-
-
-
-
-
         </div>
     )
 }

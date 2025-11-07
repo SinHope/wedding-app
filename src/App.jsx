@@ -11,6 +11,8 @@ import AdminDashboard from './assets/pages/AdminDashboard';
 import EventPage from './assets/pages/EventPage';
 import ErrorPage from './assets/pages/ErrorPage';
 import AboutUs from './assets/pages/AboutUs';
+import VideoCompressor from './assets/pages/Testing';
+import WorkerExample from './assets/components/WorkerExample';
 
 import ProtectedRoute from './assets/components/ProtectedRoute';
 
@@ -43,11 +45,15 @@ function App({ session }) {
             <Route path='about-us' element={<AboutUs />} />
             <Route path='/admin-dashboard' element={<ProtectedRoute session={session}><AdminDashboard /></ProtectedRoute>} />
 
+            <Route path='/testing' element={<VideoCompressor />} />
+            <Route path='/workerexample' element={<WorkerExample />} />
+
+
             <Route path="/event/:slug" element={<EventPage />} />
             <Route path='*' element={<ErrorPage />} />
 
           </Routes>
-          <Footer/>
+          <Footer />
         </AppProvider>
 
 

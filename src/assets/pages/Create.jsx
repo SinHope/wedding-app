@@ -39,34 +39,23 @@ const Create = ({ setShowModal, fetchEventAndPosts }) => {
 
     }
 
-    // const handleFileChange = (e) => {
-
-    //     const validFiles = Array.from(e.target.files).filter(file => file.size <= 5 * 1024 * 1024) //to filter only less than 5mb
-    //     if (validFiles.length !== e.target.files.length) {
-    //         alert('One or more photo filesize is more than 5mb. Please upload photo less than 5mb.')
-
-    //         if (fileInputRef.current) {
-    //             fileInputRef.current.value = ''
-    //         }
-
-    //         return
-    //     }
-    //     setFile(Array.from(e.target.files))
-    // }
-
     const handleFileChange = (files) => {
-        const validFiles = files.filter(file => file.size <= 50 * 1024 * 1024);
+        const validFiles = files.filter(file => file.size <= 100 * 1024 * 1024);
 
         if (validFiles.length !== files.length) {
-            alert('One or more photos are larger than 5MB. Please upload smaller ones.');
+            // alert('One or more files are larger than 5MB. Please upload smaller ones.');
+            setError('One or more files are larger than 100MB. Please upload smaller ones.')
             return;
         }
 
         setFile(validFiles);
     };
 
+    //original submit handler
     const submitHandler = async (e) => {
         e.preventDefault()
+
+        console.log('this is the original submit handler')
 
         if (!name) {
             setError("Please insert name.")
@@ -86,6 +75,7 @@ const Create = ({ setShowModal, fetchEventAndPosts }) => {
             if (uploadError) {
                 console.error(uploadError)
                 setError("File upload failed")
+                alert('issue here')
             }
 
             //2 Get public url
@@ -118,6 +108,11 @@ const Create = ({ setShowModal, fetchEventAndPosts }) => {
         // navigate(`/event/${slug}`)
         fetchEventAndPosts()
     }
+
+    
+
+
+    
 
     useEffect(() => {
         document.title = 'Create Post'
@@ -161,7 +156,7 @@ const Create = ({ setShowModal, fetchEventAndPosts }) => {
                     </div>)}
 
                 {/* Custom button to trigger file input */}
-                {error && <p style={{ color: "red" }}>{error}</p>}
+                {error && <p className='text-center mt-3' style={{ color: "red" }}>{error}</p>}
 
                 <div className='d-grid col-12 col-sm-2 mx-auto'>
                     <button type='submit' className='btn btn-primary mt-4'>Submit</button>
@@ -175,3 +170,6 @@ const Create = ({ setShowModal, fetchEventAndPosts }) => {
 }
 
 export default Create
+
+
+
