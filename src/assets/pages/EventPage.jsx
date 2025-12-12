@@ -57,36 +57,9 @@ const EventPage = () => {
 
     }
 
-    //testing edge functions
-    const testEdge = async () => {
-
-        try {
-            const { data, error } = await supabase.functions.invoke('swift-handler', {
-                body: { name: 'Functions' },
-            })
-
-            if (error) {
-                console.error('Error:', error)
-                return
-            }
-
-            console.log('Response from test edge function:', data)
-            setResponse(data)
-
-        } catch (error) {
-            console.error('failed to call function:', error)
-        }
-
-
-    }
-
     useEffect(() => {
         document.title = slug
         fetchEventAndPosts()
-
-        //test
-        testEdge()
-
 
     }, [slug])
 
@@ -115,9 +88,6 @@ const EventPage = () => {
     const formattedDate = date.toLocaleDateString("en-GB", options);
 
 
-
-
-
     return (
         <div className='' style={{ backgroundColor: '#F0E5DA' }}>
 
@@ -142,7 +112,6 @@ const EventPage = () => {
                     </button>
                 </div>
 
-
                 <ModalCreatePost show={showModal} handleClose={handleClose} setShowModal={setShowModal} fetchEventAndPosts={fetchEventAndPosts} />
 
                 <div className="">
@@ -164,22 +133,6 @@ const EventPage = () => {
                                 <strong>{item.name}</strong>
                             </div>
 
-                            {/* multiple Photo */}
-                            {/* {item.photos?.length > 1 && <Carousel>
-                                {item.photos.map((photo, idx) => (
-                                    <Carousel.Item key={idx}>
-                                        <img
-                                            className="d-block w-100"
-                                            src={photo}
-                                            alt={`Slide ${idx + 1}`}
-                                            style={{
-                                                height: "400px",
-                                                objectFit: "contain",
-                                            }}
-                                        />
-                                    </Carousel.Item>
-                                ))}
-                            </Carousel>} */}
 
                             {/* Multiple media in carousel */}
                             {item.photos?.length > 1 && (
@@ -204,7 +157,7 @@ const EventPage = () => {
                                                     alt={`Slide ${idx + 1}`}
                                                     style={{
                                                         height: "400px",
-                                                        objectFit: "contain",
+                                                        objectFit: "cover",
                                                     }}
                                                 />
                                             )}
@@ -213,23 +166,11 @@ const EventPage = () => {
                                 </Carousel>
                             )}
 
-                            {/* single photo upload */}
-                            {/* {item.photos?.length === 1 &&
-                                <img
-                                    src={item.photos[0]}
-                                    alt={item.name}
-                                    style={{
-                                        width: "100%",
-                                        height: "400px",
-                                        objectFit: "cover",
-                                    }}
-                                />
-                            } */}
 
                             {/* single file upload, image or video */}
-                            {/* Single media (photo or video) */}
                             {item.photos?.length === 1 && (
                                 <>
+                                {/* if video or else photo */}
                                     {item.photos[0].match(/\.(mp4|webm|ogg|mov)$/i) ? (
                                         <video
                                             src={item.photos[0]}
@@ -247,8 +188,9 @@ const EventPage = () => {
                                             alt={item.name}
                                             style={{
                                                 width: "100%",
-                                                height: "400px",
-                                                objectFit: "contain",
+                                                height: "auto",
+                                                maxHeight: "500px",
+                                                objectFit: "cover",
                                             }}
                                         />
                                     )}
@@ -274,9 +216,9 @@ const EventPage = () => {
                     <h5 className='text-center'>Our Partners</h5>
                     <div className='p-3 d-flex justify-content-center rounded' style={{ backgroundColor: 'white', width: '100%' }}>
                         <img src="/images/MatTeko.jpg" style={{
-                            width: '30%',      // roughly 3 images per row (with small gaps)
-                            maxWidth: '200px', // keeps logos from being too big
-                            height: 'auto',    // maintain aspect ratio
+                            width: '30%',     
+                            maxWidth: '200px', 
+                            height: 'auto',    
                             objectFit: 'contain',
                         }} alt="Mat Teko" />
                     </div>

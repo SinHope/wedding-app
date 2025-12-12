@@ -7,7 +7,7 @@ const AppContext = createContext(null) //to create the context so that we can us
 
 export function AppProvider({ children }) {
     const [session, setSession] = useState(null)
-    const [loading, setLoading] = useState(true) // 👈 new state
+    const [loading, setLoading] = useState(true) 
 
 
     async function getSession() {

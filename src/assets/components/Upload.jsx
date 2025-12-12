@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 
-const Upload = ({ handleFileChange, loading }) => {
+const Upload = ({ handleFileChange, loading, setError }) => {
   const [files, setFiles] = useState([]);
-  const maxNumber = 6;
+  const maxNumber = 4;
 
   const onChange = (e) => {
     const selectedFiles = Array.from(e.target.files);
@@ -13,13 +13,13 @@ const Upload = ({ handleFileChange, loading }) => {
     const validFiles = selectedFiles.filter(file => {
       const isImage = file.type.startsWith('image/');
       const isVideo = file.type.startsWith('video/');
-      const isValidSize = file.size <= 500 * 1024 * 1024; // 50MB max
+      const isValidSize = file.size <= 60 * 1024 * 1024;
 
       return (isImage || isVideo) && isValidSize;
     });
 
     if (validFiles.length !== selectedFiles.length) {
-      alert('Some files were rejected. Please ensure each file under 50MB.');
+      setError('Some files were rejected. Please ensure each file under 60MB.');
     }
 
     // Limit to max number
@@ -74,7 +74,7 @@ const Upload = ({ handleFileChange, loading }) => {
               ? `${files.length}/${maxNumber} file${files.length > 1 ? 's' : ''} selected`
               : 'Tap to upload'}
           </p>
-          <small className="text-muted">Images / Videos (max 50MB each)</small>
+          <small className="text-muted">Images / Videos (up to 60Mb)</small>
         </label>
 
         <input
