@@ -182,7 +182,7 @@ import { Modal } from "react-bootstrap";
 
 
 
-const Create = ({ setShowModal, fetchEventAndPosts, show, setUploadStatus  }) => {
+const Create = ({ setShowModal, fetchEventAndPosts, show, setUploadStatus }) => {
 
     const [name, setName] = useState('');
     const [message, setMessage] = useState('');
@@ -210,7 +210,7 @@ const Create = ({ setShowModal, fetchEventAndPosts, show, setUploadStatus  }) =>
     }
 
     const handleFileChange = (files) => {
-        const validFiles = files.filter(file => file.size <= 100 * 1024 * 1024);
+        const validFiles = files.filter(file => file.size <= 60 * 1024 * 1024);
 
         if (validFiles.length !== files.length) {
             setError('One or more files are larger than 60MB. Please upload smaller ones.')
@@ -323,6 +323,7 @@ const Create = ({ setShowModal, fetchEventAndPosts, show, setUploadStatus  }) =>
         try {
             // Upload files
             for (const f of files) {
+                console.log(f)
                 const filePath = `${slug}/${Date.now()}-${f.name}`;
 
                 const { data: uploadData, error: uploadError } = await supabase.storage
@@ -339,24 +340,41 @@ const Create = ({ setShowModal, fetchEventAndPosts, show, setUploadStatus  }) =>
                     .getPublicUrl(filePath);
 
                 uploadedUrls.push(publicData.publicUrl);
+
+                // Insert into database
+                const { data, error } = await supabase
+                    .from("posts")
+                    .insert([{
+                        name: userName,
+                        message: userMessage,
+                        photos: uploadedUrls,
+                        event_id: eventId
+                    }])
+                    .select();
+
+                if (error) {
+                    console.error('Database error:', error);
+                    setUploadStatus('error');
+                    return;
+                }
             }
 
-            // Insert into database
-            const { data, error } = await supabase
-                .from("posts")
-                .insert([{
-                    name: userName,
-                    message: userMessage,
-                    photos: uploadedUrls,
-                    event_id: eventId
-                }])
-                .select();
+            // // Insert into database
+            // const { data, error } = await supabase
+            //     .from("posts")
+            //     .insert([{
+            //         name: userName,
+            //         message: userMessage,
+            //         photos: uploadedUrls,
+            //         event_id: eventId
+            //     }])
+            //     .select();
 
-            if (error) {
-                console.error('Database error:', error);
-                setUploadStatus('error');
-                return;
-            }
+            // if (error) {
+            //     console.error('Database error:', error);
+            //     setUploadStatus('error');
+            //     return;
+            // }
 
             // Success
             setUploadStatus('success');
