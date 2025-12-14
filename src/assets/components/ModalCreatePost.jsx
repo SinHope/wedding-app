@@ -35,10 +35,10 @@ const ModalCreatePost = ({ show, handleClose, setShowModal, fetchEventAndPosts, 
             {/* Upload notification toast */}
             {uploadStatus === 'uploading' && (
                 <div
-                    className="position-fixed bottom-0 end-0 start-0 p-3"
-                    style={{ zIndex: 9999 }}
+                    className="position-fixed bottom-0 end-0 start-0 d-flex justify-content-center"
+                    style={{ zIndex: 9999, }}
                 >
-                    <div className="toast show bg-info text-white" role="alert">
+                    <div className="toast show bg-info text-white w-100 m-3" role="alert">
                         <div className="toast-body d-flex align-items-center">
                             <ClockLoader size={20} color="#fff" className="me-2" />
                             <span>Uploading your post...</span>
@@ -49,10 +49,10 @@ const ModalCreatePost = ({ show, handleClose, setShowModal, fetchEventAndPosts, 
 
             {uploadStatus === 'success' && (
                 <div
-                    className="position-fixed bottom-0 end-0 start-0 p-3"
+                    className="position-fixed bottom-0 end-0 start-0 d-flex justify-content-center"
                     style={{ zIndex: 9999 }}
                 >
-                    <div className="toast show bg-success text-white" role="alert">
+                    <div className="toast show bg-success text-white w-100 m-3" role="alert">
                         <div className="toast-body">
                             ✓ Post uploaded successfully!
                         </div>

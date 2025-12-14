@@ -243,6 +243,24 @@ const Create = ({ setShowModal, fetchEventAndPosts, show, setUploadStatus }) => 
 
                 uploadedUrls.push(publicData.publicUrl);
 
+                // Insert into database
+                // const { data, error } = await supabase
+                //     .from("posts")
+                //     .insert([{
+                //         name: userName,
+                //         message: userMessage,
+                //         photos: uploadedUrls,
+                //         event_id: eventId
+                //     }])
+                //     .select();
+
+                // if (error) {
+                //     console.error('Database error:', error);
+                //     setUploadStatus('error');
+                //     return;
+                // }
+            }
+
             // Insert into database
             const { data, error } = await supabase
                 .from("posts")
@@ -254,29 +272,12 @@ const Create = ({ setShowModal, fetchEventAndPosts, show, setUploadStatus }) => 
                 }])
                 .select();
 
-                if (error) {
-                    console.error('Database error:', error);
-                    setUploadStatus('error');
-                    return;
-                }
+            if (error) {
+                console.error('Database error:', error);
+                setUploadStatus('error');
+                return;
             }
 
-            // // Insert into database
-            // const { data, error } = await supabase
-            //     .from("posts")
-            //     .insert([{
-            //         name: userName,
-            //         message: userMessage,
-            //         photos: uploadedUrls,
-            //         event_id: eventId
-            //     }])
-            //     .select();
-
-            // if (error) {
-            //     console.error('Database error:', error);
-            //     setUploadStatus('error');
-            //     return;
-            // }
 
             // 3️⃣ Success
             setUploadStatus('success');
