@@ -187,7 +187,7 @@ const Create = ({ setShowModal, fetchEventAndPosts, show, setUploadStatus }) => 
     const [name, setName] = useState('');
     const [message, setMessage] = useState('');
     const [error, setError] = useState('');
-    const [file, setFile] = useState([]);
+    const [files, setFiles] = useState([]);
     const [loading, setLoading] = useState(false)
 
     const [event, setEvent] = useState(null)
@@ -217,7 +217,7 @@ const Create = ({ setShowModal, fetchEventAndPosts, show, setUploadStatus }) => 
             return;
         }
 
-        setFile(validFiles);
+        setFiles(validFiles);
     };
 
     const submitHandler = async (e) => {
@@ -240,12 +240,12 @@ const Create = ({ setShowModal, fetchEventAndPosts, show, setUploadStatus }) => 
         setUploadStatus('uploading');
 
         // Start upload in background
-        uploadInBackground(file, name, message, event.id);
+        uploadInBackground(files, name, message, event.id);
 
         // Reset form
         setName('');
         setMessage('');
-        setFile([]);
+        setFiles([]);
         setError('');
     };
 
@@ -317,16 +317,89 @@ const Create = ({ setShowModal, fetchEventAndPosts, show, setUploadStatus }) => 
     //     }
     // };
 
+    // const uploadInBackground = async (files, userName, userMessage, eventId) => {
+    //     const uploadedUrls = [];
+
+    //     try {
+    //         // Upload files
+    //         for (const f of files) {
+    //             console.log(f)
+    //             const filePath = `${slug}/${Date.now()}-${f.name}`;
+
+    //             const { data: uploadData, error: uploadError } = await supabase.storage
+    //                 .from("manganui_photos")
+    //                 .upload(filePath, f);
+
+    //             if (uploadError) {
+    //                 console.error('Upload error:', uploadError);
+    //                 continue;
+    //             }
+
+    //             const { data: publicData } = supabase.storage
+    //                 .from("manganui_photos")
+    //                 .getPublicUrl(filePath);
+
+    //             uploadedUrls.push(publicData.publicUrl);
+
+    //             // Insert into database
+    //             const { data, error } = await supabase
+    //                 .from("posts")
+    //                 .insert([{
+    //                     name: userName,
+    //                     message: userMessage,
+    //                     photos: uploadedUrls,
+    //                     event_id: eventId
+    //                 }])
+    //                 .select();
+
+    //             if (error) {
+    //                 console.error('Database error:', error);
+    //                 setUploadStatus('error');
+    //                 return;
+    //             }
+    //         }
+
+    //         // // Insert into database
+    //         // const { data, error } = await supabase
+    //         //     .from("posts")
+    //         //     .insert([{
+    //         //         name: userName,
+    //         //         message: userMessage,
+    //         //         photos: uploadedUrls,
+    //         //         event_id: eventId
+    //         //     }])
+    //         //     .select();
+
+    //         // if (error) {
+    //         //     console.error('Database error:', error);
+    //         //     setUploadStatus('error');
+    //         //     return;
+    //         // }
+
+    //         // Success
+    //         setUploadStatus('success');
+    //         fetchEventAndPosts();
+
+    //         // Hide success message after 3 seconds
+    //         setTimeout(() => setUploadStatus(null), 3000);
+
+    //     } catch (error) {
+    //         console.error('Upload error:', error);
+    //         setUploadStatus('error');
+    //     }
+    // };
+
+
+
     const uploadInBackground = async (files, userName, userMessage, eventId) => {
         const uploadedUrls = [];
 
         try {
-            // Upload files
+            // 1️⃣ Upload all files
             for (const f of files) {
-                console.log(f)
                 const filePath = `${slug}/${Date.now()}-${f.name}`;
 
-                const { data: uploadData, error: uploadError } = await supabase.storage
+                const { error: uploadError } = await supabase.storage
                     .from("manganui_photos")
                     .upload(filePath, f);
 
@@ -340,47 +413,28 @@ const Create = ({ setShowModal, fetchEventAndPosts, show, setUploadStatus }) => 
                     .getPublicUrl(filePath);
 
                 uploadedUrls.push(publicData.publicUrl);
-
-                // Insert into database
-                const { data, error } = await supabase
-                    .from("posts")
-                    .insert([{
-                        name: userName,
-                        message: userMessage,
-                        photos: uploadedUrls,
-                        event_id: eventId
-                    }])
-                    .select();
-
-                if (error) {
-                    console.error('Database error:', error);
-                    setUploadStatus('error');
-                    return;
-                }
             }
 
-            // // Insert into database
-            // const { data, error } = await supabase
-            //     .from("posts")
-            //     .insert([{
-            //         name: userName,
-            //         message: userMessage,
-            //         photos: uploadedUrls,
-            //         event_id: eventId
-            //     }])
-            //     .select();
+            // 2️⃣ Insert ONE post
+            const { data, error } = await supabase
+                .from("posts")
+                .insert([{
+                    name: userName,
+                    message: userMessage,
+                    photos: uploadedUrls,
+                    event_id: eventId
+                }]);
 
-            // if (error) {
-            //     console.error('Database error:', error);
-            //     setUploadStatus('error');
-            //     return;
-            // }
+            if (error) {
+                console.error('Database error:', error);
+                setUploadStatus('error');
+                return;
+            }
 
-            // Success
+            // 3️⃣ Success
             setUploadStatus('success');
             fetchEventAndPosts();
 
-            // Hide success message after 3 seconds
             setTimeout(() => setUploadStatus(null), 3000);
 
         } catch (error) {
@@ -388,6 +442,7 @@ const Create = ({ setShowModal, fetchEventAndPosts, show, setUploadStatus }) => 
             setUploadStatus('error');
         }
     };
+
 
 
     useEffect(() => {

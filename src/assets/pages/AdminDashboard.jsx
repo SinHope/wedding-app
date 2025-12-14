@@ -72,7 +72,6 @@ const AdminDashboard = () => {
                             return <tr key={item.id}>
                                 <td>{index + 1}</td>
                                 <td>
-                                    {/* <a href={`/event/${item.slug}`}>{item.name}</a> */}
                                     <Link to={`/event/${item.slug}`} className="text-decoration-none">
                                         {item.name}
                                     </Link>

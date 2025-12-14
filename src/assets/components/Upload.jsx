@@ -4,17 +4,48 @@ const Upload = ({ handleFileChange, loading, setError }) => {
   const [files, setFiles] = useState([]);
   const maxNumber = 4;
 
+  // const onChange = (e) => {
+  //   const selectedFiles = Array.from(e.target.files);
+
+  //   console.log(selectedFiles)
+
+  //   // Filter valid files (images and videos under size limit)
+  //   const validFiles = selectedFiles.filter(file => {
+  //     const isImage = file.type.startsWith('image/');
+  //     const isVideo = file.type.startsWith('video/');
+  //     const isValidSize = file.size <= 60 * 1024 * 1024;
+
+  //     return (isImage || isVideo) && isValidSize;
+  //   });
+
+  //   if (validFiles.length !== selectedFiles.length) {
+  //     setError('Some files were rejected. Please ensure each file under 60MB.');
+  //   }
+
+  //   // Limit to max number
+  //   const limitedFiles = validFiles.slice(0, maxNumber);
+
+  //   // Create preview URLs
+  //   const fileObjects = limitedFiles.map(file => ({
+  //     file,
+  //     preview: URL.createObjectURL(file),
+  //     type: file.type.startsWith('image/') ? 'image' : 'video'
+  //   }));
+
+  //   setFiles(fileObjects);
+  //   handleFileChange(limitedFiles);
+  // };
+
   const onChange = (e) => {
     const selectedFiles = Array.from(e.target.files);
 
     console.log(selectedFiles)
 
-    // Filter valid files (images and videos under size limit)
+    // Filter valid files
     const validFiles = selectedFiles.filter(file => {
       const isImage = file.type.startsWith('image/');
       const isVideo = file.type.startsWith('video/');
       const isValidSize = file.size <= 60 * 1024 * 1024;
-
       return (isImage || isVideo) && isValidSize;
     });
 
@@ -22,18 +53,30 @@ const Upload = ({ handleFileChange, loading, setError }) => {
       setError('Some files were rejected. Please ensure each file under 60MB.');
     }
 
-    // Limit to max number
-    const limitedFiles = validFiles.slice(0, maxNumber);
+    // Convert existing files to raw File objects
+    const existingFiles = files.map(f => {
+      return f.file
+    });
 
-    // Create preview URLs
+    // Combine old + new
+    const combinedFiles = [...existingFiles, ...validFiles];
+
+    // Enforce max limit
+    const limitedFiles = combinedFiles.slice(0, maxNumber);
+
+    // Create previews
     const fileObjects = limitedFiles.map(file => ({
       file,
       preview: URL.createObjectURL(file),
       type: file.type.startsWith('image/') ? 'image' : 'video'
     }));
 
+
     setFiles(fileObjects);
     handleFileChange(limitedFiles);
+
+    // // Reset input so same file can be picked again if needed
+    // e.target.value = null;
   };
 
   const removeFile = (index) => {
@@ -48,12 +91,10 @@ const Upload = ({ handleFileChange, loading, setError }) => {
     handleFileChange([]);
   };
 
-  // Clean up preview URLs when component unmounts
   React.useEffect(() => {
-    return () => {
-      files.forEach(f => URL.revokeObjectURL(f.preview));
-    };
-  }, []);
+    handleFileChange(files.map(f => f.file));
+  }, [files]);
+
 
   return (
     <div className="text-center">

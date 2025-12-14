@@ -9,28 +9,6 @@ const ModalCreatePost = ({ show, handleClose, setShowModal, fetchEventAndPosts, 
 
     const [uploadStatus, setUploadStatus] = useState(null); // 'uploading', 'success', 'error'
 
-
-    // return (
-    //     <Modal
-    //         show={show}
-    //         onHide={handleClose}
-    //         scrollable
-    //         dialogClassName="modal-dialog modal-dialog-centered"
-    //     >
-
-    //         <div className="modal-content">
-    //             <Modal.Header closeButton>
-    //                 <Modal.Title>Create Post</Modal.Title>
-    //             </Modal.Header>
-    //             <Modal.Body>
-    //                 <Create setShowModal={setShowModal} show={show} fetchEventAndPosts={fetchEventAndPosts} setUploadStatus={setUploadStatus}
-    //                 />
-    //             </Modal.Body>
-    //         </div>
-
-    //     </Modal>
-    // )
-
     return (
         <>
             <Modal
