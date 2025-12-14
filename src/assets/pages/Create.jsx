@@ -165,7 +165,7 @@ const Create = ({ setShowModal, fetchEventAndPosts, show, setUploadStatus }) => 
         setName(value)
     }
 
-    if (!/^[a-zA-Z\s]*$/.test(value)) {
+    if (!/^[a-zA-Z\s]*$/.test(name)) {
         setError("Name can only contain letters and spaces")
         return
     }
