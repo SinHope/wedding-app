@@ -77,147 +77,6 @@ const Create = ({ setShowModal, fetchEventAndPosts, show, setUploadStatus }) => 
         setError('');
     };
 
-    // const uploadInBackground = async (files, userName, userMessage, eventId) => {
-    //     console.log('uploadInBackground started'); // Debug
-    //     console.log('Files to upload:', files.length); // Debug
-
-    //     const uploadedUrls = [];
-
-    //     try {
-    //         for (let i = 0; i < files.length; i++) {
-    //             const f = files[i];
-    //             console.log(`Uploading file ${i + 1}/${files.length}: ${f.name}`); // Debug
-
-    //             const filePath = `${slug}/${Date.now()}-${f.name}`;
-
-    //             // Upload to Supabase storage
-    //             const { data: uploadData, error: uploadError } = await supabase.storage
-    //                 .from("manganui_photos")
-    //                 .upload(filePath, f);
-
-    //             if (uploadError) {
-    //                 console.error('Upload error for', f.name, ':', uploadError);
-    //                 continue;
-    //             }
-
-    //             console.log('Upload successful for', f.name); // Debug
-
-    //             // Get public URL
-    //             const { data: publicData } = supabase.storage
-    //                 .from("manganui_photos")
-    //                 .getPublicUrl(filePath);
-
-    //             uploadedUrls.push(publicData.publicUrl);
-    //         }
-
-    //         console.log('All uploads complete. URLs:', uploadedUrls); // Debug
-
-    //         // Only insert if we have successfully uploaded files
-    //         if (uploadedUrls.length > 0) {
-    //             console.log('Inserting into database...'); // Debug
-
-    //             // Save to database
-    //             const { data, error } = await supabase
-    //                 .from("posts")
-    //                 .insert([{
-    //                     name: userName,
-    //                     message: userMessage,
-    //                     photos: uploadedUrls,
-    //                     event_id: eventId
-    //                 }])
-    //                 .select();
-
-    //             if (error) {
-    //                 console.error('Database error:', error);
-    //                 return;
-    //             }
-
-    //             console.log('Database insert successful:', data); // Debug
-
-    //             // Success - refresh the feed
-    //             fetchEventAndPosts();
-    //         } else {
-    //             console.error('No files were uploaded successfully');
-    //         }
-
-    //     } catch (error) {
-    //         console.error('Upload error:', error);
-    //     }
-    // };
-
-    // const uploadInBackground = async (files, userName, userMessage, eventId) => {
-    //     const uploadedUrls = [];
-
-    //     try {
-    //         // Upload files
-    //         for (const f of files) {
-    //             console.log(f)
-    //             const filePath = `${slug}/${Date.now()}-${f.name}`;
-
-    //             const { data: uploadData, error: uploadError } = await supabase.storage
-    //                 .from("manganui_photos")
-    //                 .upload(filePath, f);
-
-    //             if (uploadError) {
-    //                 console.error('Upload error:', uploadError);
-    //                 continue;
-    //             }
-
-    //             const { data: publicData } = supabase.storage
-    //                 .from("manganui_photos")
-    //                 .getPublicUrl(filePath);
-
-    //             uploadedUrls.push(publicData.publicUrl);
-
-    //             // Insert into database
-    //             const { data, error } = await supabase
-    //                 .from("posts")
-    //                 .insert([{
-    //                     name: userName,
-    //                     message: userMessage,
-    //                     photos: uploadedUrls,
-    //                     event_id: eventId
-    //                 }])
-    //                 .select();
-
-    //             if (error) {
-    //                 console.error('Database error:', error);
-    //                 setUploadStatus('error');
-    //                 return;
-    //             }
-    //         }
-
-    //         // // Insert into database
-    //         // const { data, error } = await supabase
-    //         //     .from("posts")
-    //         //     .insert([{
-    //         //         name: userName,
-    //         //         message: userMessage,
-    //         //         photos: uploadedUrls,
-    //         //         event_id: eventId
-    //         //     }])
-    //         //     .select();
-
-    //         // if (error) {
-    //         //     console.error('Database error:', error);
-    //         //     setUploadStatus('error');
-    //         //     return;
-    //         // }
-
-    //         // Success
-    //         setUploadStatus('success');
-    //         fetchEventAndPosts();
-
-    //         // Hide success message after 3 seconds
-    //         setTimeout(() => setUploadStatus(null), 3000);
-
-    //     } catch (error) {
-    //         console.error('Upload error:', error);
-    //         setUploadStatus('error');
-    //     }
-    // };
-
-
 
     const uploadInBackground = async (files, userName, userMessage, eventId) => {
         const uploadedUrls = [];
@@ -300,9 +159,15 @@ const Create = ({ setShowModal, fetchEventAndPosts, show, setUploadStatus }) => 
 
     const nameHandler = (e) => {
         const value = e.target.value
-        if (/^[a-zA-Z\s]*$/.test(value)) {
-            setName(value);
-        }
+        // if (/^[a-zA-Z\s]*$/.test(value)) {
+        //     setName(value);
+        // }
+        setName(value)
+    }
+
+    if (!/^[a-zA-Z\s]*$/.test(value)) {
+        setError("Name can only contain letters and spaces")
+        return
     }
 
     return (
