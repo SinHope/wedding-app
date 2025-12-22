@@ -10,6 +10,7 @@ import { ClockLoader } from "react-spinners";
 import ModalCreatePost from '../components/ModalCreatePost'
 import EventCarousel from '../components/EventCarousel'
 import EventHeader from '../components/EventHeader'
+import SmartImage from '../components/SmartImage'
 
 
 const EventPage = () => {
@@ -93,7 +94,7 @@ const EventPage = () => {
 
             {/* cover image */}
             {event.cover_image && <div>
-                <img src={event.cover_image} className='img-fluid w-100' style={{ maxHeight: "600px", minHeight: "400px", objectFit: "cover" }} alt="" />
+                <img src={event.cover_image} className='img-fluid w-100' style={{ maxHeight: "550px", minHeight: "400px", objectFit: "cover" }} alt="" />
             </div>}
 
             <div className='container mx-auto py-4'>
@@ -151,14 +152,18 @@ const EventPage = () => {
                                                     }}
                                                 />
                                             ) : (
-                                                <img
-                                                    className="d-block w-100"
+                                                // <img
+                                                //     className="d-block w-100"
+                                                //     src={media}
+                                                //     alt={`Slide ${idx + 1}`}
+                                                //     style={{
+                                                //         height: "400px",
+                                                //         objectFit: "contain",
+                                                //     }}
+                                                // />
+                                                <SmartImage
                                                     src={media}
-                                                    alt={`Slide ${idx + 1}`}
-                                                    style={{
-                                                        height: "400px",
-                                                        objectFit: "cover",
-                                                    }}
+                                                    alt={idx + 1}
                                                 />
                                             )}
                                         </Carousel.Item>
@@ -170,7 +175,7 @@ const EventPage = () => {
                             {/* single file upload, image or video */}
                             {item.photos?.length === 1 && (
                                 <>
-                                {/* if video or else photo */}
+                                    {/* if video or else photo */}
                                     {item.photos[0].match(/\.(mp4|webm|ogg|mov)$/i) ? (
                                         <video
                                             src={item.photos[0]}
@@ -183,15 +188,9 @@ const EventPage = () => {
                                             }}
                                         />
                                     ) : (
-                                        <img
+                                        <SmartImage
                                             src={item.photos[0]}
                                             alt={item.name}
-                                            style={{
-                                                width: "100%",
-                                                height: "auto",
-                                                maxHeight: "500px",
-                                                objectFit: "cover",
-                                            }}
                                         />
                                     )}
                                 </>
@@ -216,9 +215,9 @@ const EventPage = () => {
                     <h5 className='text-center'>Our Partners</h5>
                     <div className='p-3 d-flex justify-content-center rounded' style={{ backgroundColor: 'white', width: '100%' }}>
                         <img src="/images/MatTeko.jpg" style={{
-                            width: '30%',     
-                            maxWidth: '200px', 
-                            height: 'auto',    
+                            width: '30%',
+                            maxWidth: '200px',
+                            height: 'auto',
                             objectFit: 'contain',
                         }} alt="Mat Teko" />
                     </div>

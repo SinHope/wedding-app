@@ -39,7 +39,7 @@ const Upload = ({ handleFileChange, loading, setError }) => {
   const onChange = (e) => {
     const selectedFiles = Array.from(e.target.files);
 
-    console.log(selectedFiles)
+    // console.log(selectedFiles)
 
     // Filter valid files
     const validFiles = selectedFiles.filter(file => {

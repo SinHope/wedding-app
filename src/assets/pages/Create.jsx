@@ -84,7 +84,7 @@ const Create = ({ setShowModal, fetchEventAndPosts, show, setUploadStatus }) => 
         try {
             // 1️⃣ Upload all files
             for (const f of files) {
-                console.log(f)
+                // console.log(f)
                 const filePath = `${slug}/${Date.now()}-${f.name}`;
 
                 const { error: uploadError } = await supabase.storage
