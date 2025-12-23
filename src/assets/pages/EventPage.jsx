@@ -214,12 +214,19 @@ const EventPage = () => {
                 <div className='mt-4'>
                     <h5 className='text-center'>Our Partners</h5>
                     <div className='p-3 d-flex justify-content-center rounded' style={{ backgroundColor: 'white', width: '100%' }}>
-                        <img src="/images/MatTeko.jpg" style={{
+                        <img className='me-3' src="/images/MatTeko.jpg" style={{
                             width: '30%',
                             maxWidth: '200px',
                             height: 'auto',
                             objectFit: 'contain',
                         }} alt="Mat Teko" />
+
+                        <img src="/images/BO555KU_Motoring_Black.jpg" style={{
+                            width: '30%',
+                            maxWidth: '280px',
+                            height: 'auto',
+                            objectFit: 'cover',
+                        }} alt="Bossku Motoring" />
                     </div>
                 </div>
             </div>
