@@ -211,7 +211,7 @@ const EventPage = () => {
                     ))}
                 </div>
 
-                <div className='mt-4'>
+                {/* <div className='mt-4'>
                     <h5 className='text-center'>Our Partners</h5>
                     <div className='p-3 d-flex justify-content-center rounded' style={{ backgroundColor: 'white', width: '100%' }}>
                         <img className='me-3' src="/images/MatTeko.jpg" style={{
@@ -222,13 +222,41 @@ const EventPage = () => {
                         }} alt="Mat Teko" />
 
                         <img src="/images/BO555KU_Motoring_Black.jpg" style={{
-                            width: '30%',
-                            maxWidth: '280px',
+                            width: '40%',
                             height: 'auto',
                             objectFit: 'cover',
                         }} alt="Bossku Motoring" />
                     </div>
+                </div> */}
+
+                <div className="mt-4">
+                    <h5 className="text-center">Our Partners</h5>
+
+                    <div className="p-3 bg-white rounded container">
+                        <div className="row align-items-center justify-content-center text-center">
+
+                            <div className="col-4 mb-2 me-2">
+                                <img
+                                    src="/images/MatTeko.jpg"
+                                    className="img-fluid"
+                                    style={{ maxHeight: '120px', objectFit: 'contain' }}
+                                    alt="Mat Teko"
+                                />
+                            </div>
+
+                            <div className="col-4">
+                                <img
+                                    src="/images/BO555KU_Motoring_Black.jpg"
+                                    className=""
+                                    style={{ maxHeight: '120px', objectFit: 'contain', width:'130px' }}
+                                    alt="Bossku Motoring"
+                                />
+                            </div>
+
+                        </div>
+                    </div>
                 </div>
+
             </div>
         </div>
     )
