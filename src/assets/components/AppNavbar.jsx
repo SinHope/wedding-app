@@ -44,9 +44,9 @@ function AppNavbar() {
                             Contact
                         </Nav.Link>
 
-                        <Nav.Link as={NavLink} to='/about-us' onClick={() => setExpanded(false)}>
+                        {/* <Nav.Link as={NavLink} to='/about-us' onClick={() => setExpanded(false)}>
                             About Us
-                        </Nav.Link>
+                        </Nav.Link> */}
 
                         {/* {!session && <Nav.Link as={NavLink} to="/login" onClick={() => setExpanded(false)}>
                             Login (Admin)
