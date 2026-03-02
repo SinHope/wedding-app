@@ -10,7 +10,7 @@ const Footer = () => {
             {isEventPage && (
                 <Link
                     to="/contact"
-                    className="relative z-[60] text-sm border border-[#5A3E36] text-[#5A3E36] px-3 py-1 rounded hover:bg-[#5A3E36] hover:text-white transition-colors"
+                    className="text-sm border border-[#5A3E36] text-[#5A3E36] px-3 py-1 rounded hover:bg-[#5A3E36] hover:text-white transition-colors"
                 >
                     Enquire Here
                 </Link>
