@@ -23,7 +23,8 @@ const AdminDashboard = () => {
     const [showCreate, setShowCreate] = useState(false)
     const [creating, setCreating] = useState(false)
     const [createError, setCreateError] = useState('')
-    const [form, setForm] = useState({ name: '', slug: '', event_date: '', cover_image: '' })
+    const [form, setForm] = useState({ name: '', slug: '', event_date: '' })
+    const [coverFile, setCoverFile] = useState(null)
 
     const [qrEvent, setQrEvent] = useState(null)
 
@@ -60,14 +61,32 @@ const AdminDashboard = () => {
             return
         }
         setCreating(true)
+
+        let coverUrl = null
+        if (coverFile) {
+            const ext = coverFile.name.split('.').pop()
+            const path = `covers/${form.slug}-cover.${ext}`
+            const { error: uploadError } = await supabase.storage
+                .from('manganui_photos')
+                .upload(path, coverFile, { upsert: true })
+            if (uploadError) {
+                setCreateError('Cover image upload failed: ' + uploadError.message)
+                setCreating(false)
+                return
+            }
+            const { data: urlData } = supabase.storage.from('manganui_photos').getPublicUrl(path)
+            coverUrl = urlData.publicUrl
+        }
+
         const { error } = await supabase.from('events').insert([{
             name: form.name, slug: form.slug, event_date: form.event_date,
-            cover_image: form.cover_image || null,
+            cover_image: coverUrl,
         }])
         setCreating(false)
         if (error) { setCreateError(error.message); return }
         setShowCreate(false)
-        setForm({ name: '', slug: '', event_date: '', cover_image: '' })
+        setForm({ name: '', slug: '', event_date: '' })
+        setCoverFile(null)
         fetchEvents()
     }
 
@@ -241,12 +260,22 @@ const AdminDashboard = () => {
                                 <input type="date" className={inputClass} value={form.event_date} onChange={e => setForm(prev => ({ ...prev, event_date: e.target.value }))} required />
                             </div>
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">Cover Image URL <span className="text-gray-400">(optional)</span></label>
-                                <input type="url" className={inputClass} placeholder="https://..." value={form.cover_image} onChange={e => setForm(prev => ({ ...prev, cover_image: e.target.value }))} />
+                                <label className="block text-sm font-medium text-gray-700 mb-1">Cover Image <span className="text-gray-400">(optional)</span></label>
+                                <input
+                                    type="file"
+                                    accept="image/*"
+                                    className="w-full text-sm text-gray-600 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-sm file:font-medium file:text-white file:bg-[#5A3E36] file:cursor-pointer cursor-pointer"
+                                    onChange={e => setCoverFile(e.target.files[0] || null)}
+                                />
+                                {coverFile && (
+                                    <div className="mt-2">
+                                        <img src={URL.createObjectURL(coverFile)} alt="Preview" className="h-24 rounded-lg object-cover" />
+                                    </div>
+                                )}
                             </div>
                             {createError && <p className="text-red-500 text-sm">{createError}</p>}
                             <div className="flex gap-3 justify-end pt-2">
-                                <button type="button" onClick={() => setShowCreate(false)} className="px-4 py-2 text-sm border border-gray-300 rounded-lg text-gray-600 hover:bg-gray-50">
+                                <button type="button" onClick={() => { setShowCreate(false); setCoverFile(null) }} className="px-4 py-2 text-sm border border-gray-300 rounded-lg text-gray-600 hover:bg-gray-50">
                                     Cancel
                                 </button>
                                 <button type="submit" disabled={creating} className="px-4 py-2 text-sm text-white rounded-lg disabled:opacity-50 hover:opacity-90" style={{ backgroundColor: '#5A3E36' }}>
