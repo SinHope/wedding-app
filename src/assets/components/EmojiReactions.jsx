@@ -1,4 +1,6 @@
 import { useState } from 'react'
+import { Dialog, DialogPanel, DialogTitle } from '@headlessui/react'
+import { X } from 'react-feather'
 import supabase from '../../config/supabaseClient'
 
 const EMOJIS = [
@@ -21,7 +23,7 @@ const normalize = (r) => {
 const EmojiReactions = ({ postId, initialReactions, guestName }) => {
     const [reactions, setReactions] = useState(() => normalize(initialReactions))
     const [myReaction, setMyReaction] = useState(() => localStorage.getItem(`reaction-${postId}`) || null)
-    const [showWho, setShowWho] = useState(false)
+    const [showModal, setShowModal] = useState(false)
 
     const name = guestName || localStorage.getItem('guestName') || 'Guest'
 
@@ -34,12 +36,10 @@ const EmojiReactions = ({ postId, initialReactions, guestName }) => {
             pray:  [...(reactions.pray  || [])],
         }
 
-        // Remove from previous reaction
         if (prev) {
             newReactions[prev] = newReactions[prev].filter(n => n !== name)
         }
 
-        // If clicking a different reaction, add to it. If same, just toggle off.
         let nextReaction = null
         if (prev !== key) {
             if (!newReactions[key].includes(name)) {
@@ -59,7 +59,6 @@ const EmojiReactions = ({ postId, initialReactions, guestName }) => {
 
         const { error } = await supabase.from('posts').update({ reactions: newReactions }).eq('id', postId)
         if (error) {
-            // Revert on failure
             setReactions(reactions)
             setMyReaction(prev)
             if (prev) localStorage.setItem(`reaction-${postId}`, prev)
@@ -76,22 +75,12 @@ const EmojiReactions = ({ postId, initialReactions, guestName }) => {
     return (
         <div className="px-3 pb-3">
             {totalCount > 0 && (
-                <div className="mb-2">
-                    <button
-                        className="text-xs text-gray-400 hover:text-gray-600 transition-colors underline-offset-2 hover:underline"
-                        onClick={() => setShowWho(prev => !prev)}
-                    >
-                        {totalCount} {totalCount === 1 ? 'reaction' : 'reactions'}
-                    </button>
-
-                    {showWho && (
-                        <div className="mt-1 rounded-lg px-3 py-2 text-xs space-y-0.5" style={{ backgroundColor: '#f9f4f0', color: '#6B4B3E' }}>
-                            {reactionList.map((item, idx) => (
-                                <div key={idx}>{item.name} {item.emoji} this post</div>
-                            ))}
-                        </div>
-                    )}
-                </div>
+                <button
+                    className="text-xs text-gray-400 hover:text-gray-600 transition-colors hover:underline underline-offset-2 mb-2 block"
+                    onClick={() => setShowModal(true)}
+                >
+                    {totalCount} {totalCount === 1 ? 'reaction' : 'reactions'}
+                </button>
             )}
 
             <div className="flex gap-2">
@@ -111,6 +100,35 @@ const EmojiReactions = ({ postId, initialReactions, guestName }) => {
                     </button>
                 ))}
             </div>
+
+            <Dialog open={showModal} onClose={() => setShowModal(false)} className="relative z-50">
+                <div className="fixed inset-0 bg-black/40" aria-hidden="true" />
+                <div className="fixed inset-0 flex items-center justify-center p-4">
+                    <DialogPanel className="bg-white rounded-2xl w-full max-w-xs shadow-xl overflow-hidden">
+                        <div className="flex items-center justify-between px-4 py-3 border-b border-gray-100">
+                            <DialogTitle className="font-semibold text-sm" style={{ color: '#5A3E36' }}>
+                                Reactions
+                            </DialogTitle>
+                            <button onClick={() => setShowModal(false)} className="text-gray-400 hover:text-gray-600 transition-colors">
+                                <X size={16} />
+                            </button>
+                        </div>
+
+                        <div className="overflow-y-auto max-h-72 px-4 py-3 space-y-3">
+                            {reactionList.length === 0 ? (
+                                <p className="text-sm text-gray-400 text-center py-4">No reactions yet</p>
+                            ) : (
+                                reactionList.map((item, idx) => (
+                                    <div key={idx} className="flex items-center justify-between">
+                                        <span className="text-sm text-gray-700">{item.name}</span>
+                                        <span className="text-lg">{item.emoji}</span>
+                                    </div>
+                                ))
+                            )}
+                        </div>
+                    </DialogPanel>
+                </div>
+            </Dialog>
         </div>
     )
 }

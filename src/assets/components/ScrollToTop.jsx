@@ -15,8 +15,8 @@ const ScrollToTop = () => {
     return (
         <button
             onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
-            className="fixed bottom-6 right-6 w-11 h-11 flex items-center justify-center rounded-full shadow-lg z-50 hover:opacity-80 transition-opacity"
-            style={{ backgroundColor: '#5A3E36', color: '#fff' }}
+            className="fixed bottom-6 right-6 w-11 h-11 flex items-center justify-center rounded-full z-50 hover:opacity-60 transition-opacity"
+            style={{ backgroundColor: 'transparent', color: '#5A3E36', border: '2px solid #5A3E36' }}
             title="Scroll to top"
         >
             <ArrowUp size={18} />
