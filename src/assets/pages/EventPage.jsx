@@ -15,7 +15,6 @@ import CountdownTimer from '../components/CountdownTimer'
 import EmojiReactions from '../components/EmojiReactions'
 import ShareButton from '../components/ShareButton'
 import SaveButton from '../components/SaveButton'
-import QRCodeGenerator from '../components/QRCodeGenerator'
 import SentimentSummary from '../components/SentimentSummary'
 import ScrollToTop from '../components/ScrollToTop'
 
@@ -31,7 +30,6 @@ const EventPage = () => {
 
     const [showModal, setShowModal] = useState(false)
     const [lightbox, setLightbox] = useState({ open: false, slides: [], index: 0 })
-    const [showQR, setShowQR] = useState(false)
 
     useEffect(() => {
         document.title = slug
@@ -156,15 +154,7 @@ const EventPage = () => {
 
                 <div className="flex justify-center gap-2 my-4 flex-wrap">
                     <ShareButton eventName={event.name} slug={slug} />
-                    <button
-                        className="flex items-center gap-1 text-sm px-3 py-1.5 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
-                        onClick={() => setShowQR(prev => !prev)}
-                    >
-                        {showQR ? 'Hide QR Code' : 'Show QR Code'}
-                    </button>
                 </div>
-
-                {showQR && <QRCodeGenerator slug={slug} eventName={event.name} />}
 
                 {postDataArray.length >= 3 && (
                     <SentimentSummary posts={postDataArray} />

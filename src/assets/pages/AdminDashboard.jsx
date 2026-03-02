@@ -1,9 +1,20 @@
 import { useState, useEffect } from 'react'
 import supabase from '../../config/supabaseClient'
-import { Plus, Trash2, Lock, Unlock, Eye, X } from 'react-feather'
+import { Plus, Trash2, Lock, Unlock, Eye, X, Download } from 'react-feather'
 import { Link } from 'react-router-dom'
 import { Dialog, DialogPanel, DialogTitle } from '@headlessui/react'
 import { ClockLoader } from 'react-spinners'
+import { QRCodeCanvas } from 'qrcode.react'
+
+const QrIcon = () => (
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <rect x="3" y="3" width="7" height="7" /><rect x="14" y="3" width="7" height="7" /><rect x="3" y="14" width="7" height="7" />
+        <rect x="5" y="5" width="3" height="3" fill="currentColor" stroke="none" />
+        <rect x="16" y="5" width="3" height="3" fill="currentColor" stroke="none" />
+        <rect x="5" y="16" width="3" height="3" fill="currentColor" stroke="none" />
+        <line x1="14" y1="14" x2="14" y2="14" /><line x1="17" y1="14" x2="21" y2="14" /><line x1="14" y1="17" x2="14" y2="21" /><line x1="17" y1="17" x2="21" y2="21" /><line x1="21" y1="17" x2="21" y2="17" />
+    </svg>
+)
 
 const AdminDashboard = () => {
     const [events, setEvents] = useState([])
@@ -13,6 +24,8 @@ const AdminDashboard = () => {
     const [creating, setCreating] = useState(false)
     const [createError, setCreateError] = useState('')
     const [form, setForm] = useState({ name: '', slug: '', event_date: '', cover_image: '' })
+
+    const [qrEvent, setQrEvent] = useState(null)
 
     useEffect(() => {
         fetchEvents()
@@ -131,6 +144,13 @@ const AdminDashboard = () => {
                                                 <Eye size={14} />
                                             </Link>
                                             <button
+                                                className="p-1.5 border border-purple-300 rounded text-purple-500 hover:bg-purple-50"
+                                                title="Show QR Code"
+                                                onClick={() => setQrEvent(item)}
+                                            >
+                                                <QrIcon />
+                                            </button>
+                                            <button
                                                 className="p-1.5 border border-amber-400 rounded text-amber-600 hover:bg-amber-50"
                                                 title={item.status === 'active' ? 'Lock event' : 'Unlock event'}
                                                 onClick={() => toggleStatus(item)}
@@ -152,6 +172,48 @@ const AdminDashboard = () => {
                     </table>
                 </div>
             )}
+
+            {/* QR Code Modal */}
+            <Dialog open={!!qrEvent} onClose={() => setQrEvent(null)} className="relative z-50">
+                <div className="fixed inset-0 bg-black/50" aria-hidden="true" />
+                <div className="fixed inset-0 flex items-center justify-center p-4">
+                    <DialogPanel className="bg-white rounded-xl w-full max-w-xs shadow-xl">
+                        <div className="flex items-center justify-between px-5 pt-4 pb-3 border-b border-gray-100">
+                            <DialogTitle className="font-semibold text-gray-800 text-sm">{qrEvent?.name}</DialogTitle>
+                            <button onClick={() => setQrEvent(null)} className="text-gray-400 hover:text-gray-600">
+                                <X size={16} />
+                            </button>
+                        </div>
+                        <div className="flex flex-col items-center px-5 py-5 gap-4">
+                            <div id="qr-canvas-wrapper" className="p-3 bg-white rounded-lg border border-gray-100 shadow-sm">
+                                {qrEvent && (
+                                    <QRCodeCanvas
+                                        value={`${window.location.origin}/event/${qrEvent.slug}`}
+                                        size={180}
+                                        bgColor="#ffffff"
+                                        fgColor="#7e22ce"
+                                        level="M"
+                                    />
+                                )}
+                            </div>
+                            <p className="text-xs text-gray-400">/event/{qrEvent?.slug}</p>
+                            <button
+                                className="flex items-center gap-2 text-sm px-4 py-1.5 border border-purple-300 rounded-lg text-purple-600 hover:bg-purple-50 transition-colors"
+                                onClick={() => {
+                                    const canvas = document.querySelector('#qr-canvas-wrapper canvas')
+                                    if (!canvas) return
+                                    const link = document.createElement('a')
+                                    link.download = `${qrEvent.slug}-qr.png`
+                                    link.href = canvas.toDataURL()
+                                    link.click()
+                                }}
+                            >
+                                <Download size={14} /> Download QR
+                            </button>
+                        </div>
+                    </DialogPanel>
+                </div>
+            </Dialog>
 
             {/* Create Event Modal */}
             <Dialog open={showCreate} onClose={() => setShowCreate(false)} className="relative z-50">
