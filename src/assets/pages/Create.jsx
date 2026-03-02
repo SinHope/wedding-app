@@ -11,6 +11,9 @@ const Create = ({ setShowModal, fetchEventAndPosts, setUploadStatus, defaultName
     const [event, setEvent] = useState(null)
     const { slug } = useParams()
 
+    const [suggestions, setSuggestions] = useState([])
+    const [loadingSuggestions, setLoadingSuggestions] = useState(false)
+
     useEffect(() => {
         if (defaultName) setName(defaultName)
     }, [defaultName])
@@ -33,6 +36,41 @@ const Create = ({ setShowModal, fetchEventAndPosts, setUploadStatus, defaultName
             return
         }
         setFiles(validFiles)
+    }
+
+    const suggestCaption = async () => {
+        if (!import.meta.env.VITE_CLAUDE_API_KEY) return
+        if (!event) return
+        setLoadingSuggestions(true)
+        setSuggestions([])
+        try {
+            const response = await fetch('https://api.anthropic.com/v1/messages', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'x-api-key': import.meta.env.VITE_CLAUDE_API_KEY,
+                    'anthropic-version': '2023-06-01',
+                    'anthropic-dangerous-direct-browser-access': 'true',
+                },
+                body: JSON.stringify({
+                    model: 'claude-haiku-4-5-20251001',
+                    max_tokens: 300,
+                    messages: [{
+                        role: 'user',
+                        content: `Generate 3 short, heartfelt message suggestions for a wedding guest to write at "${event.name}". Each should be warm, celebratory, and 1-2 sentences. Return only the 3 messages as a JSON array of strings, e.g. ["msg1","msg2","msg3"]. No extra text.`,
+                    }],
+                }),
+            })
+            const data = await response.json()
+            if (!response.ok) return
+            const text = data.content[0].text.trim()
+            const parsed = JSON.parse(text)
+            if (Array.isArray(parsed)) setSuggestions(parsed)
+        } catch {
+            // silently fail — guest can just type manually
+        } finally {
+            setLoadingSuggestions(false)
+        }
     }
 
     const nameHandler = (e) => {
@@ -96,8 +134,37 @@ const Create = ({ setShowModal, fetchEventAndPosts, setUploadStatus, defaultName
             </div>
 
             <div className="mb-3">
-                <label htmlFor="message" className="block text-sm font-medium text-gray-700 mb-1">Message *</label>
+                <div className="flex items-center justify-between mb-1">
+                    <label htmlFor="message" className="block text-sm font-medium text-gray-700">Message *</label>
+                    {import.meta.env.VITE_CLAUDE_API_KEY && (
+                        <button
+                            type="button"
+                            onClick={suggestCaption}
+                            disabled={loadingSuggestions || !event}
+                            className="text-xs px-2 py-1 rounded-lg border transition-colors disabled:opacity-40"
+                            style={{ borderColor: '#5A3E36', color: '#5A3E36' }}
+                        >
+                            {loadingSuggestions ? 'Thinking...' : '✨ Suggest'}
+                        </button>
+                    )}
+                </div>
                 <textarea id="message" placeholder="Write your message for the couple here" className={inputClass} value={message} rows={3} onChange={e => setMessage(e.target.value)} required />
+                {suggestions.length > 0 && (
+                    <div className="mt-2 space-y-1">
+                        <p className="text-xs text-gray-400">Click a suggestion to use it:</p>
+                        {suggestions.map((s, i) => (
+                            <button
+                                key={i}
+                                type="button"
+                                onClick={() => { setMessage(s); setSuggestions([]) }}
+                                className="w-full text-left text-xs px-3 py-2 rounded-lg border border-gray-200 hover:border-[#5A3E36] hover:bg-[#fdf6f0] transition-colors"
+                                style={{ color: '#6B4B3E' }}
+                            >
+                                {s}
+                            </button>
+                        ))}
+                    </div>
+                )}
             </div>
 
             <Upload handleFileChange={handleFileChange} setError={setError} />
