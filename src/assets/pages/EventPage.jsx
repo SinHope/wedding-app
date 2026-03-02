@@ -1,263 +1,285 @@
-import React, { useEffect, useState, useRef } from 'react'
+import { useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import supabase from '../../config/supabaseClient'
-import { useNavigate } from 'react-router-dom'
-import ErrorPage from './ErrorPage'
-import { NavLink } from 'react-router-dom';
-import feather from "feather-icons";
-import Carousel from "react-bootstrap/Carousel";
-import { ClockLoader } from "react-spinners";
-import ModalCreatePost from '../components/ModalCreatePost'
-import EventCarousel from '../components/EventCarousel'
-import EventHeader from '../components/EventHeader'
-import SmartImage from '../components/SmartImage'
+import { ClockLoader } from 'react-spinners'
+import { formatDistanceToNow } from 'date-fns'
+import confetti from 'canvas-confetti'
+import Lightbox from 'yet-another-react-lightbox'
+import 'yet-another-react-lightbox/styles.css'
 
+import ModalCreatePost from '../components/ModalCreatePost'
+import PostCarousel from '../components/PostCarousel'
+import SmartImage from '../components/SmartImage'
+import WelcomeSplash from '../components/WelcomeSplash'
+import CountdownTimer from '../components/CountdownTimer'
+import EmojiReactions from '../components/EmojiReactions'
+import ShareButton from '../components/ShareButton'
+import SaveButton from '../components/SaveButton'
+import QRCodeGenerator from '../components/QRCodeGenerator'
+import SentimentSummary from '../components/SentimentSummary'
+import ScrollToTop from '../components/ScrollToTop'
 
 const EventPage = () => {
-
     const { slug } = useParams()
-    const navigate = useNavigate()
 
-    const [event, setEvent] = useState('')
+    const [event, setEvent] = useState(null)
     const [postDataArray, setPostDataArray] = useState([])
     const [loading, setLoading] = useState(true)
 
-    const [response, setResponse] = useState(null)
+    const [showSplash, setShowSplash] = useState(false)
+    const [guestName, setGuestName] = useState(localStorage.getItem('guestName') || '')
+
+    const [showModal, setShowModal] = useState(false)
+    const [lightbox, setLightbox] = useState({ open: false, slides: [], index: 0 })
+    const [showQR, setShowQR] = useState(false)
+
+    useEffect(() => {
+        document.title = slug
+        fetchEventAndPosts()
+    }, [slug])
+
+    useEffect(() => {
+        if (!loading && event) {
+            const key = `splashShown-${slug}`
+            if (!sessionStorage.getItem(key)) {
+                setShowSplash(true)
+            }
+        }
+    }, [loading, event])
 
     const fetchEventAndPosts = async () => {
         const { data: eventData, error: errorEvent } = await supabase
-            .from("events")
+            .from('events')
             .select()
             .eq('slug', slug)
             .single()
 
         if (errorEvent) {
             console.error(errorEvent.message)
+            setLoading(false)
             return
         }
 
         if (eventData) {
             setEvent(eventData)
-
             const { data: postData, error: errorPost } = await supabase
-                .from("posts")
+                .from('posts')
                 .select()
                 .eq('event_id', eventData.id)
-                .order('created_at', { ascending: false }); // latest first
+                .order('is_pinned', { ascending: false })
+                .order('created_at', { ascending: false })
 
-
-            if (postData) {
-                setPostDataArray(postData)
-                setLoading(false)
-            }
-
-            if (errorPost) {
-                console.error(errorPost.message)
-            }
+            if (postData) setPostDataArray(postData)
+            if (errorPost) console.error(errorPost.message)
+            setLoading(false)
         }
-
     }
 
-    useEffect(() => {
-        document.title = slug
-        fetchEventAndPosts()
+    const handleSplashComplete = (name) => {
+        setGuestName(name)
+        sessionStorage.setItem(`splashShown-${slug}`, 'true')
+        setShowSplash(false)
+    }
 
-    }, [slug])
+    const handlePostSuccess = () => {
+        confetti({
+            particleCount: 120,
+            spread: 80,
+            origin: { y: 0.6 },
+            colors: ['#c9a84c', '#f5e193', '#5A3E36', '#F0E5DA'],
+        })
+    }
 
-
-    useEffect(() => {
-        if (!loading) {
-            feather.replace()
-        }
-    }, [loading])
-
-    const [showModal, setShowModal] = useState(false);
-    const handleShow = () => setShowModal(true);
-    const handleClose = () => setShowModal(false);
-
+    const openLightbox = (photos, clickedIndex) => {
+        const slides = photos
+            .filter(url => !url.match(/\.(mp4|webm|ogg|mov)$/i))
+            .map(url => ({ src: url }))
+        if (slides.length === 0) return
+        setLightbox({ open: true, slides, index: clickedIndex })
+    }
 
     if (loading) {
         return (
-            <div className="d-flex justify-content-center my-5">
+            <div className="flex justify-center my-12">
                 <ClockLoader />
             </div>
         )
     }
 
-    const date = new Date(event.event_date)
-    const options = { day: "2-digit", month: "long", year: "numeric" };
-    const formattedDate = date.toLocaleDateString("en-GB", options);
+    if (!event) {
+        return <div className="text-center my-12">Event not found.</div>
+    }
 
+    const formattedDate = new Date(event.event_date).toLocaleDateString('en-GB', {
+        day: '2-digit', month: 'long', year: 'numeric'
+    })
+
+    const isLocked = event.status === 'locked' || new Date() > new Date(event.event_date)
 
     return (
-        <div className='' style={{ backgroundColor: '#F0E5DA' }}>
+        <div style={{ backgroundColor: '#F0E5DA', minHeight: '100vh' }}>
 
-            {/* cover image */}
-            {event.cover_image && <div>
-                <img src={event.cover_image} className='img-fluid w-100' style={{ maxHeight: "550px", minHeight: "400px", objectFit: "cover" }} alt="" />
-            </div>}
+            {showSplash && (
+                <WelcomeSplash eventName={event.name} onComplete={handleSplashComplete} />
+            )}
 
-            <div className='container mx-auto py-4'>
+            <Lightbox
+                open={lightbox.open}
+                close={() => setLightbox(prev => ({ ...prev, open: false }))}
+                slides={lightbox.slides}
+                index={lightbox.index}
+            />
 
-                {/* {showCarousel && <EventCarousel postDataArray={postDataArray} />} */}
+            {event.cover_image && (
+                <img
+                    src={event.cover_image}
+                    className="w-full object-cover"
+                    style={{ maxHeight: '550px', minHeight: '400px' }}
+                    alt="Cover"
+                />
+            )}
 
-                <div className='text-center mt-3'>
-                    <h1>{event.name}</h1>
-                    <h3 className='mt-2'>{formattedDate}</h3>
+            <div className="max-w-xl mx-auto px-4 py-6">
+
+                <div className="text-center mt-3">
+                    <h1 className="text-3xl font-semibold" style={{ color: '#5A3E36' }}>{event.name}</h1>
+                    <p className="text-gray-500 mt-1">{formattedDate}</p>
                 </div>
 
-                <div className='d-grid gap-2 my-5 col-12 col-sm-6 col-md-2 ms-sm-auto'>
-                    <button className='btn btn-light w-100 d-flex justify-content-center btn-outline-secondary' onClick={handleShow}>
-                        <i className='' data-feather="plus"></i>
-                        <span className='text-dark'>Create Post</span>
+                <CountdownTimer eventDate={event.event_date} />
+
+                {postDataArray.length > 0 && (
+                    <p className="text-center text-gray-500 text-sm">
+                        {postDataArray.length} {postDataArray.length === 1 ? 'guest has' : 'guests have'} posted
+                    </p>
+                )}
+
+                <div className="flex justify-center gap-2 my-4 flex-wrap">
+                    <ShareButton eventName={event.name} slug={slug} />
+                    <button
+                        className="flex items-center gap-1 text-sm px-3 py-1.5 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+                        onClick={() => setShowQR(prev => !prev)}
+                    >
+                        {showQR ? 'Hide QR Code' : 'Show QR Code'}
                     </button>
                 </div>
 
-                <ModalCreatePost show={showModal} handleClose={handleClose} setShowModal={setShowModal} fetchEventAndPosts={fetchEventAndPosts} />
+                {showQR && <QRCodeGenerator slug={slug} eventName={event.name} />}
 
-                <div className="">
+                {postDataArray.length >= 3 && (
+                    <SentimentSummary posts={postDataArray} />
+                )}
 
-                    {postDataArray.length === 0 && (
-                        <div className="text-center mt-4">
-                            No messages posted yet. Lets start posting!
+                {isLocked ? (
+                    <div className="text-center my-4 py-3 px-4 rounded-xl" style={{ backgroundColor: '#f3e8e2', color: '#5A3E36', border: '1px solid #d4bfb5' }}>
+                        <strong>This event has ended.</strong>
+                        <p className="mb-0 text-sm mt-1">No new posts can be added. The memories are locked forever. 🔒</p>
+                    </div>
+                ) : (
+                    <>
+                        <div className="my-4">
+                            <button
+                                className="w-full py-2.5 rounded-lg flex justify-center items-center gap-1 font-medium text-sm hover:opacity-90 transition-opacity"
+                                onClick={() => setShowModal(true)}
+                                style={{ backgroundColor: '#5A3E36', color: '#fff' }}
+                            >
+                                + Create Post
+                            </button>
                         </div>
-                    )}
 
-                    {postDataArray.map((item, index) => (
+                        <ModalCreatePost
+                            show={showModal}
+                            handleClose={() => setShowModal(false)}
+                            setShowModal={setShowModal}
+                            fetchEventAndPosts={fetchEventAndPosts}
+                            defaultName={guestName}
+                            onSuccess={handlePostSuccess}
+                        />
+                    </>
+                )}
+
+                {postDataArray.length === 0 && (
+                    <div className="text-center mt-4 text-gray-500">
+                        No posts yet. Be the first to share!
+                    </div>
+                )}
+
+                {postDataArray.map((item) => {
+                    const images = (item.photos || []).filter(url => !url.match(/\.(mp4|webm|ogg|mov)$/i))
+
+                    return (
                         <div
-                            key={index}
-                            className="card my-3 shadow-sm"
-                            style={{ maxWidth: "500px", margin: "0 auto" }} // IG-style centered post
+                            key={item.id}
+                            className="bg-white rounded-xl my-4 shadow-sm overflow-hidden"
+                            style={{ maxWidth: '500px', margin: '16px auto' }}
                         >
-                            {/* Header */}
-                            <div className="card-header d-flex align-items-center">
-                                <strong>{item.name}</strong>
+                            <div className="flex items-center justify-between px-4 py-3 border-b border-gray-100">
+                                <strong className="text-gray-800">{item.name}</strong>
+                                <span className="text-gray-400 text-xs">
+                                    {formatDistanceToNow(new Date(item.created_at), { addSuffix: true })}
+                                </span>
                             </div>
 
-
-                            {/* Multiple media in carousel */}
                             {item.photos?.length > 1 && (
-                                <Carousel interval={null}>
-                                    {item.photos.map((media, idx) => (
-                                        <Carousel.Item key={idx}>
-                                            {media.match(/\.(mp4|webm|ogg|mov)$/i) ? (
-                                                <video
-                                                    src={media}
-                                                    controls
-                                                    style={{
-                                                        width: "100%",
-                                                        height: "400px",
-                                                        objectFit: "contain",
-                                                        backgroundColor: "#000"
-                                                    }}
-                                                />
-                                            ) : (
-                                                // <img
-                                                //     className="d-block w-100"
-                                                //     src={media}
-                                                //     alt={`Slide ${idx + 1}`}
-                                                //     style={{
-                                                //         height: "400px",
-                                                //         objectFit: "contain",
-                                                //     }}
-                                                // />
-                                                <SmartImage
-                                                    src={media}
-                                                    alt={idx + 1}
-                                                />
-                                            )}
-                                        </Carousel.Item>
-                                    ))}
-                                </Carousel>
+                                <PostCarousel
+                                    photos={item.photos}
+                                    onImageClick={(idx) => openLightbox(item.photos, idx)}
+                                />
                             )}
 
-
-                            {/* single file upload, image or video */}
                             {item.photos?.length === 1 && (
-                                <>
-                                    {/* if video or else photo */}
-                                    {item.photos[0].match(/\.(mp4|webm|ogg|mov)$/i) ? (
-                                        <video
-                                            src={item.photos[0]}
-                                            controls
-                                            style={{
-                                                width: "100%",
-                                                maxHeight: "400px",
-                                                objectFit: "contain",
-                                                backgroundColor: "#000"
-                                            }}
-                                        />
-                                    ) : (
-                                        <SmartImage
-                                            src={item.photos[0]}
-                                            alt={item.name}
-                                        />
-                                    )}
-                                </>
+                                item.photos[0].match(/\.(mp4|webm|ogg|mov)$/i) ? (
+                                    <video
+                                        src={item.photos[0]}
+                                        controls
+                                        style={{ width: '100%', maxHeight: '400px', objectFit: 'contain', backgroundColor: '#000' }}
+                                    />
+                                ) : (
+                                    <div style={{ cursor: 'zoom-in' }} onClick={() => openLightbox(item.photos, 0)}>
+                                        <SmartImage src={item.photos[0]} alt={item.name} />
+                                    </div>
+                                )
                             )}
 
-                            {item.photos?.length === 0 &&
-                                <div className='ms-3 mt-2'>
-                                    {/* No photos uploaded */}
-                                    Message:
+                            <div className="px-4 py-3">
+                                <p className="text-gray-700 text-sm">{item.message}</p>
+                            </div>
+
+                            <div className="px-3 pb-2 flex items-center justify-between">
+                                <div className="flex flex-wrap gap-2">
+                                    {images.map((url, idx) => (
+                                        <SaveButton
+                                            key={idx}
+                                            imageUrl={url}
+                                            watermarkEnabled={event.watermark_enabled}
+                                            eventName={event.name}
+                                        />
+                                    ))}
                                 </div>
-                            }
-
-                            {/* Message */}
-                            <div className="card-body">
-                                <p className="card-text">{item.message}</p>
-                            </div>
-                        </div>
-                    ))}
-                </div>
-
-                {/* <div className='mt-4'>
-                    <h5 className='text-center'>Our Partners</h5>
-                    <div className='p-3 d-flex justify-content-center rounded' style={{ backgroundColor: 'white', width: '100%' }}>
-                        <img className='me-3' src="/images/MatTeko.jpg" style={{
-                            width: '30%',
-                            maxWidth: '200px',
-                            height: 'auto',
-                            objectFit: 'contain',
-                        }} alt="Mat Teko" />
-
-                        <img src="/images/BO555KU_Motoring_Black.jpg" style={{
-                            width: '40%',
-                            height: 'auto',
-                            objectFit: 'cover',
-                        }} alt="Bossku Motoring" />
-                    </div>
-                </div> */}
-
-                <div className="mt-4">
-                    <h5 className="text-center">Our Partners</h5>
-
-                    <div className="p-3 bg-white rounded container">
-                        <div className="row align-items-center justify-content-center text-center">
-
-                            <div className="col-4 mb-2 me-2">
-                                <img
-                                    src="/images/MatTeko.jpg"
-                                    className="img-fluid"
-                                    style={{ maxHeight: '120px', objectFit: 'contain' }}
-                                    alt="Mat Teko"
+                                <ShareButton
+                                    eventName={event.name}
+                                    slug={slug}
+                                    text={`Check out ${item.name}'s post at ${event.name}!`}
                                 />
                             </div>
 
-                            <div className="col-4">
-                                <img
-                                    src="/images/BO555KU_Motoring_Black.jpg"
-                                    className=""
-                                    style={{ maxHeight: '120px', objectFit: 'contain', width:'130px' }}
-                                    alt="Bossku Motoring"
-                                />
-                            </div>
+                            <EmojiReactions postId={item.id} initialReactions={item.reactions} guestName={guestName} />
+                        </div>
+                    )
+                })}
 
+                <div className="mt-10">
+                    <h5 className="text-center font-semibold text-gray-700 mb-3">Our Partners</h5>
+                    <div className="p-4 bg-white rounded-xl">
+                        <div className="flex items-center justify-center gap-6 flex-wrap text-center">
+                            <img src="/images/MatTeko.jpg" style={{ maxHeight: '120px', objectFit: 'contain', maxWidth: '140px' }} alt="Mat Teko" />
+                            <img src="/images/BO555KU_Motoring_Black.jpg" style={{ maxHeight: '120px', objectFit: 'contain', width: '130px' }} alt="Bossku Motoring" />
                         </div>
                     </div>
                 </div>
-
             </div>
+
+            <ScrollToTop />
         </div>
     )
 }
