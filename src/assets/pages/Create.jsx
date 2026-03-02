@@ -64,8 +64,12 @@ const Create = ({ setShowModal, fetchEventAndPosts, setUploadStatus, defaultName
             const data = await response.json()
             if (!response.ok) return
             const text = data.content[0].text.trim()
-            const parsed = JSON.parse(text)
-            if (Array.isArray(parsed)) setSuggestions(parsed)
+            // Extract JSON array even if Claude wraps it in markdown code fences
+            const match = text.match(/\[[\s\S]*\]/)
+            if (match) {
+                const parsed = JSON.parse(match[0])
+                if (Array.isArray(parsed)) setSuggestions(parsed)
+            }
         } catch {
             // silently fail — guest can just type manually
         } finally {
