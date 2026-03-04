@@ -151,7 +151,7 @@ const Create = ({ setShowModal, fetchEventAndPosts, setUploadStatus, defaultName
         }
     }
 
-    const inputClass = "w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#5A3E36] focus:border-transparent"
+    const inputClass = "w-full border border-[#F4D9A9] rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#F4D9A9] focus:border-transparent"
 
     return (
         <div>
@@ -202,7 +202,7 @@ const Create = ({ setShowModal, fetchEventAndPosts, setUploadStatus, defaultName
             {error && <p className="text-center mt-3 text-red-500 text-sm">{error}</p>}
 
             <div className="mt-4">
-                <button type="button" onClick={submitHandler} className="w-full py-2 rounded-lg text-white font-medium text-sm hover:opacity-90" style={{ backgroundColor: '#5A3E36' }}>
+                <button type="button" onClick={submitHandler} className="w-full py-2 rounded-lg font-medium text-sm hover:opacity-90" style={{ backgroundColor: '#FFFFF0', color: '#5A3E36' }}>
                     Submit
                 </button>
             </div>

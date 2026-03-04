@@ -108,14 +108,14 @@ const EventPage = () => {
         return <div className="text-center my-12">Event not found.</div>
     }
 
-    const formattedDate = new Date(event.event_date).toLocaleDateString('en-GB', {
-        day: '2-digit', month: 'long', year: 'numeric'
-    })
-
     const isLocked = event.status === 'locked' || new Date() > new Date(event.event_date)
 
+    const coverDate = new Date(event.event_date).toLocaleDateString('en-GB', {
+        day: '2-digit', month: '2-digit', year: 'numeric'
+    })
+
     return (
-        <div style={{ backgroundColor: '#F0E5DA', minHeight: '100vh' }}>
+        <div style={{ backgroundColor: '#FFFFFF', minHeight: '100vh' }}>
 
             {showSplash && (
                 <WelcomeSplash eventName={event.name} onComplete={handleSplashComplete} />
@@ -128,31 +128,51 @@ const EventPage = () => {
                 index={lightbox.index}
             />
 
-            {event.cover_image && (
-                <img
-                    src={event.cover_image}
-                    className="w-full object-cover"
-                    style={{ maxHeight: '550px', minHeight: '400px' }}
-                    alt="Cover"
-                />
-            )}
+            {/* Cover image with text overlay */}
+            <div className="relative w-full" style={{ height: '480px' }}>
+                {event.cover_image ? (
+                    <img
+                        src={event.cover_image}
+                        className="w-full h-full object-cover"
+                        alt="Cover"
+                    />
+                ) : (
+                    <div className="w-full h-full" style={{ background: 'linear-gradient(180deg, #7a5248 0%, #5A3E36 100%)' }} />
+                )}
+                {/* Gradient overlay */}
+                <div className="absolute inset-0" style={{ background: 'linear-gradient(to bottom, transparent 25%, rgba(0,0,0,0.6) 100%)' }} />
+                {/* Name + date text */}
+                <div className="absolute bottom-10 left-0 right-0 text-center text-white px-4">
+                    <h1 style={{ fontFamily: "'Great Vibes', cursive", fontSize: 'clamp(2.5rem, 8vw, 4rem)', textShadow: '0 2px 12px rgba(0,0,0,0.4)', lineHeight: 1.2, margin: 0 }}>
+                        {event.name}
+                    </h1>
+                    <p style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: '1.05rem', letterSpacing: '0.12em', opacity: 0.9, margin: '6px 0 0' }}>
+                        {coverDate}
+                    </p>
+                </div>
+            </div>
 
-            <div className="max-w-xl mx-auto px-4 py-6">
+            <div className="max-w-xl mx-auto px-4">
 
-                <div className="text-center mt-3">
-                    <h1 className="text-3xl font-semibold" style={{ color: '#5A3E36' }}>{event.name}</h1>
-                    <p className="text-gray-500 mt-1">{formattedDate}</p>
+                {/* Wedding Album header */}
+                <div className="text-center py-7">
+                    <h2 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: '1.8rem', color: '#c9a84c', fontWeight: 600, margin: 0 }}>
+                        Wedding Album
+                    </h2>
+                    <p className="text-gray-400 text-sm mt-2 mx-auto" style={{ maxWidth: '280px', lineHeight: 1.6 }}>
+                        Let's memorize their very special day with creating an album of beautiful moments
+                    </p>
                 </div>
 
                 <CountdownTimer eventDate={event.event_date} />
 
                 {postDataArray.length > 0 && (
-                    <p className="text-center text-gray-500 text-sm">
+                    <p className="text-center text-gray-500 text-sm mb-2">
                         {postDataArray.length} {postDataArray.length === 1 ? 'guest has' : 'guests have'} posted
                     </p>
                 )}
 
-                <div className="flex justify-center gap-2 my-4 flex-wrap">
+                <div className="flex justify-center gap-2 my-3 flex-wrap">
                     <ShareButton eventName={event.name} slug={slug} />
                 </div>
 
@@ -169,11 +189,11 @@ const EventPage = () => {
                     <>
                         <div className="my-4">
                             <button
-                                className="w-full py-2.5 rounded-lg flex justify-center items-center gap-1 font-medium text-sm hover:opacity-90 transition-opacity"
+                                className="w-full py-3 rounded-full font-medium text-sm hover:opacity-90 transition-opacity tracking-wide"
                                 onClick={() => setShowModal(true)}
-                                style={{ backgroundColor: '#5A3E36', color: '#fff' }}
+                                style={{ backgroundColor: '#F4D9A9', color: '#5A3E36' }}
                             >
-                                + Create Post
+                                Create Post
                             </button>
                         </div>
 
@@ -200,10 +220,10 @@ const EventPage = () => {
                     return (
                         <div
                             key={item.id}
-                            className="bg-white rounded-xl my-4 shadow-sm overflow-hidden"
-                            style={{ maxWidth: '500px', margin: '16px auto' }}
+                            className="bg-white rounded-xl my-4 overflow-hidden"
+                            style={{ maxWidth: '500px', margin: '16px auto', border: '1px solid #F4D9A9' }}
                         >
-                            <div className="flex items-center justify-between px-4 py-3 border-b border-gray-100">
+                            <div className="flex items-center justify-between px-4 py-3 border-b border-[#F4D9A9]">
                                 <strong className="text-gray-800">{item.name}</strong>
                                 <span className="text-gray-400 text-xs">
                                     {formatDistanceToNow(new Date(item.created_at), { addSuffix: true })}

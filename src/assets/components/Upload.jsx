@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { Camera } from 'react-feather'
 
 const Upload = ({ handleFileChange, loading, setError }) => {
     const [files, setFiles] = useState([])
@@ -49,10 +50,10 @@ const Upload = ({ handleFileChange, loading, setError }) => {
                 htmlFor="file-input"
                 className="block border-2 border-dashed border-gray-300 rounded-xl p-6 cursor-pointer hover:border-[#5A3E36] hover:bg-[#fffaf6] transition-colors"
             >
-                <p className="text-gray-600 text-sm font-medium">
+                <p className="text-gray-600 text-sm font-medium flex items-center justify-center gap-1">
                     {files.length > 0
                         ? `${files.length}/${maxNumber} file${files.length > 1 ? 's' : ''} selected`
-                        : '📷 Tap to upload'}
+                        : <><Camera size={16} color="#9B3A5A" /><span>Tap to upload</span></>}
                 </p>
                 <p className="text-xs text-gray-400 mt-1">Images / Videos (up to 60MB)</p>
             </label>
