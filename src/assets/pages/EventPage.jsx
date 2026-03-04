@@ -269,7 +269,7 @@ const EventPage = () => {
                     <ShareButton eventName={event.name} slug={slug} />
                 </div>
 
-                {postDataArray.length >= 3 && (
+                {isLocked && postDataArray.length >= 3 && (
                     <SentimentSummary posts={postDataArray} />
                 )}
 
