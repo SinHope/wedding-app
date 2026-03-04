@@ -225,7 +225,7 @@ const AdminDashboard = () => {
     }
 
     return (
-        <div className="max-w-4xl mx-auto px-4 py-8">
+        <div className="max-w-6xl mx-auto px-4 py-8">
             <h4 className="text-center text-xl font-semibold my-4">Admin Dashboard</h4>
 
             {/* Search + Sort + Create row */}
@@ -281,6 +281,8 @@ const AdminDashboard = () => {
                                         Date <SortArrow field="event_date" />
                                     </button>
                                 </th>
+                                <th className="px-4 py-3 text-left font-medium text-gray-600">Location</th>
+                                <th className="px-4 py-3 text-left font-medium text-gray-600">Phone</th>
                                 <th className="px-4 py-3 text-left font-medium text-gray-600">Status</th>
                                 <th className="px-4 py-3 text-left font-medium text-gray-600">Actions</th>
                             </tr>
@@ -304,6 +306,8 @@ const AdminDashboard = () => {
                                             year: "numeric", month: "short", day: "numeric"
                                         })}
                                     </td>
+                                    <td className="px-4 py-3 text-gray-600 text-xs">{item.location || <span className="text-gray-300">—</span>}</td>
+                                    <td className="px-4 py-3 text-gray-600 text-xs">{item.phone_number || <span className="text-gray-300">—</span>}</td>
                                     <td className="px-4 py-3">
                                         <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${item.status === 'active' ? 'bg-green-100 text-green-700' : 'bg-gray-200 text-gray-600'}`}>
                                             {item.status}
