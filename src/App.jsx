@@ -10,6 +10,7 @@ import Login from './assets/pages/Login';
 import AdminDashboard from './assets/pages/AdminDashboard';
 import EventPage from './assets/pages/EventPage';
 import ErrorPage from './assets/pages/ErrorPage';
+import Testimonials from './assets/pages/Testimonials';
 import AboutUs from './assets/pages/AboutUs';
 import VideoCompressor from './assets/pages/Testing';
 import WorkerExample from './assets/components/WorkerExample';
@@ -50,6 +51,7 @@ function App({ session }) {
 
 
             <Route path="/event/:slug" element={<EventPage />} />
+            <Route path="/testimonials" element={<Testimonials />} />
             <Route path='*' element={<ErrorPage />} />
 
           </Routes>

@@ -47,6 +47,35 @@ const Home = () => {
                 </div>
             </section>
 
+            {/* Testimonials Snippet */}
+            <section className="py-16 px-4" style={{ background: 'linear-gradient(135deg, #fffaf6, #f6e4d8)' }}>
+                <div className="max-w-2xl mx-auto text-center">
+                    <p style={{ color: '#c9a84c', fontFamily: "'Cormorant Garamond', serif", letterSpacing: '0.18em', fontSize: '0.85rem', textTransform: 'uppercase', marginBottom: '0.4rem' }}>
+                        Kind Words
+                    </p>
+                    <h2 style={{ fontFamily: "'Great Vibes', cursive", fontSize: 'clamp(2rem, 5vw, 2.8rem)', color: '#5A3E36', marginBottom: '2rem' }}>
+                        What Couples Say
+                    </h2>
+                    <div className="rounded-2xl p-8 text-left" style={{ backgroundColor: '#fffaf6', border: '1px solid #e8d5c4' }}>
+                        <span style={{ color: '#c9a84c', fontSize: '3rem', fontFamily: 'Georgia, serif', lineHeight: 1 }}>"</span>
+                        <p className="italic text-lg leading-relaxed mt-1" style={{ color: '#5A3E36', fontFamily: "'Cormorant Garamond', serif", fontSize: '1.1rem' }}>
+                            Every guest was able to share their moments effortlessly, and now we have a treasure trove of photos and heartfelt messages to look back on forever.
+                        </p>
+                        <p className="mt-4" style={{ fontFamily: "'Great Vibes', cursive", fontSize: '1.6rem', color: '#5A3E36' }}>
+                            Ridwan & Aisyah
+                        </p>
+                        <p className="text-xs mt-0.5" style={{ color: '#c9a84c', letterSpacing: '0.1em' }}>January 2026</p>
+                    </div>
+                    <Link
+                        to="/testimonials"
+                        className="mt-6 inline-block px-6 py-2.5 rounded-lg font-medium text-sm hover:opacity-90 transition-opacity"
+                        style={{ backgroundColor: '#5A3E36', color: '#fff' }}
+                    >
+                        Read More Stories →
+                    </Link>
+                </div>
+            </section>
+
             {/* Call To Action Section */}
             <section className="text-center py-16 px-4" style={{ background: '#5A3E36', color: '#fff' }}>
                 <h2 className="text-2xl font-bold">Make Your Wedding Memories Last Forever</h2>

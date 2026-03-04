@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import supabase from '../../config/supabaseClient'
 import { useParams } from 'react-router-dom'
 import Upload from '../components/Upload'
+import { containsProfanity } from '../utils/profanityFilter'
 
 const Create = ({ setShowModal, fetchEventAndPosts, setUploadStatus, defaultName, onSuccess }) => {
     const [name, setName] = useState(defaultName || '')
@@ -117,6 +118,7 @@ const Create = ({ setShowModal, fetchEventAndPosts, setUploadStatus, defaultName
         e.preventDefault()
         if (!name.trim()) { setError('Please enter your name.'); return }
         if (!message.trim()) { setError('Please write a message.'); return }
+        if (containsProfanity(message)) { setError('Your message contains inappropriate language. Please keep it respectful.'); return }
 
         setShowModal(false)
         setUploadStatus('uploading')

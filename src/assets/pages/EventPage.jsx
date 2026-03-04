@@ -6,6 +6,8 @@ import { formatDistanceToNow } from 'date-fns'
 import confetti from 'canvas-confetti'
 import Lightbox from 'yet-another-react-lightbox'
 import 'yet-another-react-lightbox/styles.css'
+import { Dialog, DialogPanel, DialogTitle } from '@headlessui/react'
+import { Edit2, Trash2, X } from 'react-feather'
 
 import ModalCreatePost from '../components/ModalCreatePost'
 import PostCarousel from '../components/PostCarousel'
@@ -17,9 +19,11 @@ import ShareButton from '../components/ShareButton'
 import SaveButton from '../components/SaveButton'
 import SentimentSummary from '../components/SentimentSummary'
 import ScrollToTop from '../components/ScrollToTop'
+import { useAppContext } from '../components/AppContext'
 
 const EventPage = () => {
     const { slug } = useParams()
+    const { session } = useAppContext()
 
     const [event, setEvent] = useState(null)
     const [postDataArray, setPostDataArray] = useState([])
@@ -30,6 +34,12 @@ const EventPage = () => {
 
     const [showModal, setShowModal] = useState(false)
     const [lightbox, setLightbox] = useState({ open: false, slides: [], index: 0 })
+
+    // Admin edit state
+    const [editPost, setEditPost] = useState(null)
+    const [editMessage, setEditMessage] = useState('')
+    const [editPhotos, setEditPhotos] = useState([])
+    const [editSaving, setEditSaving] = useState(false)
 
     useEffect(() => {
         document.title = slug
@@ -96,6 +106,32 @@ const EventPage = () => {
         setLightbox({ open: true, slides, index: clickedIndex })
     }
 
+    const openEditModal = (post) => {
+        setEditPost(post)
+        setEditMessage(post.message || '')
+        setEditPhotos(post.photos || [])
+    }
+
+    const handleEditSave = async () => {
+        if (!editPost) return
+        setEditSaving(true)
+        const { error } = await supabase
+            .from('posts')
+            .update({ message: editMessage, photos: editPhotos })
+            .eq('id', editPost.id)
+        setEditSaving(false)
+        if (error) { console.error(error.message); return }
+        setEditPost(null)
+        fetchEventAndPosts()
+    }
+
+    const handleDeletePost = async (postId) => {
+        if (!window.confirm('Delete this post? This cannot be undone.')) return
+        const { error } = await supabase.from('posts').delete().eq('id', postId)
+        if (error) { console.error(error.message); return }
+        fetchEventAndPosts()
+    }
+
     if (loading) {
         return (
             <div className="flex justify-center my-12">
@@ -127,6 +163,63 @@ const EventPage = () => {
                 slides={lightbox.slides}
                 index={lightbox.index}
             />
+
+            {/* Admin Edit Post Modal */}
+            {editPost && (
+                <Dialog open={!!editPost} onClose={() => setEditPost(null)} className="relative z-50">
+                    <div className="fixed inset-0 bg-black/50" aria-hidden="true" />
+                    <div className="fixed inset-0 flex items-center justify-center p-4">
+                        <DialogPanel className="bg-white rounded-xl w-full max-w-md shadow-xl">
+                            <div className="flex items-center justify-between px-4 pt-4 pb-3 border-b border-gray-100">
+                                <DialogTitle className="font-semibold text-gray-800">Edit Post — {editPost.name}</DialogTitle>
+                                <button onClick={() => setEditPost(null)} className="text-gray-400 hover:text-gray-600 p-1">
+                                    <X size={18} />
+                                </button>
+                            </div>
+                            <div className="p-4 space-y-4">
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">Message</label>
+                                    <textarea
+                                        className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#5A3E36]"
+                                        rows={4}
+                                        value={editMessage}
+                                        onChange={e => setEditMessage(e.target.value)}
+                                    />
+                                </div>
+                                {editPhotos.length > 0 && (
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-2">Photos / Videos</label>
+                                        <div className="flex flex-wrap gap-2">
+                                            {editPhotos.map((url, idx) => (
+                                                <div key={idx} className="relative rounded overflow-hidden" style={{ width: 80, height: 80 }}>
+                                                    {url.match(/\.(mp4|webm|ogg|mov)$/i)
+                                                        ? <div className="w-full h-full bg-black flex items-center justify-center text-white text-xs">Video</div>
+                                                        : <img src={url} alt="" className="w-full h-full object-cover" />
+                                                    }
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => setEditPhotos(prev => prev.filter((_, i) => i !== idx))}
+                                                        className="absolute top-0 right-0 bg-red-500 text-white w-5 h-5 flex items-center justify-center text-xs"
+                                                    >×</button>
+                                                </div>
+                                            ))}
+                                        </div>
+                                        <p className="text-xs text-gray-400 mt-1">Click × to remove a photo/video.</p>
+                                    </div>
+                                )}
+                                <button
+                                    onClick={handleEditSave}
+                                    disabled={editSaving}
+                                    className="w-full py-2 rounded-lg text-white font-medium text-sm hover:opacity-90 disabled:opacity-50"
+                                    style={{ backgroundColor: '#5A3E36' }}
+                                >
+                                    {editSaving ? 'Saving...' : 'Save Changes'}
+                                </button>
+                            </div>
+                        </DialogPanel>
+                    </div>
+                </Dialog>
+            )}
 
             {/* Cover image with text overlay */}
             <div className="relative w-full" style={{ height: '480px' }}>
@@ -225,9 +318,29 @@ const EventPage = () => {
                         >
                             <div className="flex items-center justify-between px-4 py-3 border-b border-[#F4D9A9]">
                                 <strong className="text-gray-800">{item.name}</strong>
-                                <span className="text-gray-400 text-xs">
-                                    {formatDistanceToNow(new Date(item.created_at), { addSuffix: true })}
-                                </span>
+                                <div className="flex items-center gap-2">
+                                    <span className="text-gray-400 text-xs">
+                                        {formatDistanceToNow(new Date(item.created_at), { addSuffix: true })}
+                                    </span>
+                                    {session && (
+                                        <>
+                                            <button
+                                                onClick={() => openEditModal(item)}
+                                                className="p-1 rounded hover:bg-gray-100 text-gray-400 hover:text-[#5A3E36] transition-colors"
+                                                title="Edit post"
+                                            >
+                                                <Edit2 size={14} />
+                                            </button>
+                                            <button
+                                                onClick={() => handleDeletePost(item.id)}
+                                                className="p-1 rounded hover:bg-red-50 text-gray-400 hover:text-red-500 transition-colors"
+                                                title="Delete post"
+                                            >
+                                                <Trash2 size={14} />
+                                            </button>
+                                        </>
+                                    )}
+                                </div>
                             </div>
 
                             {item.photos?.length > 1 && (

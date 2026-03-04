@@ -6,7 +6,7 @@ const Footer = () => {
 
     return (
         <footer className="flex flex-wrap justify-between items-center py-3 border-t border-gray-200 bg-gray-50 px-4">
-            <span className="text-gray-500 text-sm">© 2025 Ridwan Yusoff</span>
+            <span className="text-gray-500 text-sm">© 2026 Ridwan Yusoff And Nasmer Fontanilla</span>
             {isEventPage && (
                 <Link
                     to="/contact"

@@ -27,6 +27,7 @@ function AppNavbar() {
                     {/* Desktop nav */}
                     <div className="hidden md:flex items-center gap-1">
                         <NavLink to="/" end className={linkClass}>Home</NavLink>
+                        <NavLink to="/testimonials" className={linkClass}>Testimonials</NavLink>
                         <NavLink to="/contact" className={linkClass}>Contact</NavLink>
                         {session && <NavLink to="/admin-dashboard" className={linkClass}>Admin Dashboard</NavLink>}
                         {session && (
@@ -46,6 +47,7 @@ function AppNavbar() {
                 {open && (
                     <div className="md:hidden border-t border-gray-100 py-2">
                         <NavLink to="/" end className={linkClass} onClick={() => setOpen(false)}>Home</NavLink>
+                        <NavLink to="/testimonials" className={linkClass} onClick={() => setOpen(false)}>Testimonials</NavLink>
                         <NavLink to="/contact" className={linkClass} onClick={() => setOpen(false)}>Contact</NavLink>
                         {session && (
                             <NavLink to="/admin-dashboard" className={linkClass} onClick={() => setOpen(false)}>
