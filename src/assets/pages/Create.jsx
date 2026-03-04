@@ -38,12 +38,42 @@ const Create = ({ setShowModal, fetchEventAndPosts, setUploadStatus, defaultName
         setFiles(validFiles)
     }
 
+    // Returns { base64, mediaType } for the first image file, or null
+    const getFirstImageAsBase64 = (fileList) => {
+        const imageFile = fileList.find(f => f.type.startsWith('image/') && f.size <= 3.75 * 1024 * 1024)
+        if (!imageFile) return Promise.resolve(null)
+        return new Promise((resolve) => {
+            const reader = new FileReader()
+            reader.onload = () => {
+                const dataUrl = reader.result
+                const base64 = dataUrl.split(',')[1]
+                resolve({ base64, mediaType: imageFile.type })
+            }
+            reader.onerror = () => resolve(null)
+            reader.readAsDataURL(imageFile)
+        })
+    }
+
     const suggestCaption = async () => {
         if (!import.meta.env.VITE_CLAUDE_API_KEY) return
         if (!event) return
         setLoadingSuggestions(true)
         setSuggestions([])
         try {
+            // Case 1 & 4: find first image; Case 2: video only → null; Case 3: no files → null
+            const imageData = await getFirstImageAsBase64(files)
+
+            const textPrompt = imageData
+                ? `You are helping a wedding guest write a heartfelt message at "${event.name}". Looking at this photo they took at the event, generate 3 warm, personal blessing messages they could write to the couple. Each should feel genuine and inspired by what you see in the photo — 1-2 sentences each. Return only the 3 messages as a JSON array of strings, e.g. ["msg1","msg2","msg3"]. No extra text.`
+                : `Generate 3 short, heartfelt wedding blessing messages for a guest attending "${event.name}". Each should be warm, personal, and celebratory — 1-2 sentences. Return only the 3 messages as a JSON array of strings, e.g. ["msg1","msg2","msg3"]. No extra text.`
+
+            const messageContent = imageData
+                ? [
+                    { type: 'image', source: { type: 'base64', media_type: imageData.mediaType, data: imageData.base64 } },
+                    { type: 'text', text: textPrompt },
+                ]
+                : textPrompt
+
             const response = await fetch('https://api.anthropic.com/v1/messages', {
                 method: 'POST',
                 headers: {
@@ -55,16 +85,12 @@ const Create = ({ setShowModal, fetchEventAndPosts, setUploadStatus, defaultName
                 body: JSON.stringify({
                     model: 'claude-haiku-4-5-20251001',
                     max_tokens: 300,
-                    messages: [{
-                        role: 'user',
-                        content: `Generate 3 short, heartfelt message suggestions for a wedding guest to write at "${event.name}". Each should be warm, celebratory, and 1-2 sentences. Return only the 3 messages as a JSON array of strings, e.g. ["msg1","msg2","msg3"]. No extra text.`,
-                    }],
+                    messages: [{ role: 'user', content: messageContent }],
                 }),
             })
             const data = await response.json()
             if (!response.ok) return
             const text = data.content[0].text.trim()
-            // Extract JSON array even if Claude wraps it in markdown code fences
             const match = text.match(/\[[\s\S]*\]/)
             if (match) {
                 const parsed = JSON.parse(match[0])
@@ -148,7 +174,7 @@ const Create = ({ setShowModal, fetchEventAndPosts, setUploadStatus, defaultName
                             className="text-xs px-2 py-1 rounded-lg border transition-colors disabled:opacity-40"
                             style={{ borderColor: '#5A3E36', color: '#5A3E36' }}
                         >
-                            {loadingSuggestions ? 'Thinking...' : '✨ Suggest'}
+                            {loadingSuggestions ? 'Generating... ✨' : '✨ Suggest'}
                         </button>
                     )}
                 </div>
