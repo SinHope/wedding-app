@@ -5,7 +5,7 @@ const testimonials = [
         id: 1,
         coupleName: "Ridwan & Aisyah",
         quote: "We couldn't have imagined our wedding memories being captured so beautifully. Every guest was able to share their moments effortlessly, and now we have a treasure trove of photos and heartfelt messages to look back on forever. Manganui made our special day even more memorable.",
-        photo: "/images/placeholder-couple.jpg",
+        photo: "/images/Assyafaah-Mosque-wedding-23.jpg",
         wedding: "January 2026",
     },
 ]
