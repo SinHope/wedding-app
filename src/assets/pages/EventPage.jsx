@@ -369,15 +369,12 @@ const EventPage = () => {
                             </div>
 
                             <div className="px-3 pb-2 flex items-center justify-between">
-                                <div className="flex flex-wrap gap-2">
-                                    {images.map((url, idx) => (
-                                        <SaveButton
-                                            key={idx}
-                                            imageUrl={url}
-                                            watermarkEnabled={event.watermark_enabled}
-                                            eventName={event.name}
-                                        />
-                                    ))}
+                                <div>
+                                    <SaveButton
+                                        images={images}
+                                        watermarkEnabled={event.watermark_enabled}
+                                        eventName={event.name}
+                                    />
                                 </div>
                                 <ShareButton
                                     eventName={event.name}
