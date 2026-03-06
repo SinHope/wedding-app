@@ -45,6 +45,12 @@ const AdminDashboard = () => {
     const [sortDir, setSortDir] = useState('desc')
     const [dateFilter, setDateFilter] = useState('')
 
+    // Custom confirm dialog
+    const [confirmDialog, setConfirmDialog] = useState({ open: false, message: '', onConfirm: null })
+    const showConfirm = (message, onConfirm) => setConfirmDialog({ open: true, message, onConfirm })
+    const handleConfirmOk = () => { confirmDialog.onConfirm?.(); setConfirmDialog({ open: false, message: '', onConfirm: null }) }
+    const handleConfirmCancel = () => setConfirmDialog({ open: false, message: '', onConfirm: null })
+
     useEffect(() => {
         fetchEvents()
     }, [])
@@ -126,16 +132,18 @@ const AdminDashboard = () => {
         setEditError('')
     }
 
-    const handleEditSubmit = async (e) => {
+    const handleEditSubmit = (e) => {
         e.preventDefault()
         setEditError('')
         if (!editForm.name || !editForm.event_date) {
             setEditError('Name and event date are required.')
             return
         }
-        if (!window.confirm('Are you sure you want to save these changes?')) return
-        setEditing(true)
+        showConfirm('Are you sure you want to save these changes?', doEditSave)
+    }
 
+    const doEditSave = async () => {
+        setEditing(true)
         let coverUrl = editEvent.cover_image || null
         if (editCoverFile) {
             const ext = editCoverFile.name.split('.').pop()
@@ -151,7 +159,6 @@ const AdminDashboard = () => {
             const { data: urlData } = supabase.storage.from('manganui_photos').getPublicUrl(path)
             coverUrl = urlData.publicUrl
         }
-
         const { error } = await supabase.from('events').update({
             name: editForm.name,
             event_date: editForm.event_date,
@@ -161,24 +168,31 @@ const AdminDashboard = () => {
             phone_number: editForm.phone_number || null,
             cover_image: coverUrl,
         }).eq('id', editEvent.id)
-
         setEditing(false)
         if (error) { setEditError(error.message); return }
         setEditEvent(null)
         fetchEvents()
     }
 
-    const toggleStatus = async (event) => {
+    const toggleStatus = (event) => {
         const newStatus = event.status === 'active' ? 'locked' : 'active'
-        if (newStatus === 'locked' && !window.confirm('Are you sure you want to lock this event?')) return
-        const { error } = await supabase.from('events').update({ status: newStatus }).eq('id', event.id)
-        if (!error) fetchEvents()
+        if (newStatus === 'locked') {
+            showConfirm('Are you sure you want to lock this event?', async () => {
+                const { error } = await supabase.from('events').update({ status: newStatus }).eq('id', event.id)
+                if (!error) fetchEvents()
+            })
+        } else {
+            supabase.from('events').update({ status: newStatus }).eq('id', event.id).then(({ error }) => {
+                if (!error) fetchEvents()
+            })
+        }
     }
 
-    const deleteEvent = async (id) => {
-        if (!window.confirm('Are you sure you want to delete this event? This will also delete all its posts and cannot be undone.')) return
-        const { error } = await supabase.from('events').delete().eq('id', id)
-        if (!error) fetchEvents()
+    const deleteEvent = (id) => {
+        showConfirm('Are you sure you want to delete this event? This will also delete all its posts and cannot be undone.', async () => {
+            const { error } = await supabase.from('events').delete().eq('id', id)
+            if (!error) fetchEvents()
+        })
     }
 
     const handleSort = (field) => {
@@ -323,11 +337,7 @@ const AdminDashboard = () => {
                                             <button
                                                 className="p-1.5 border border-purple-300 rounded text-purple-500 hover:bg-purple-50"
                                                 title="Show QR Code"
-                                                onClick={() => {
-                                                    if (window.confirm('⚠️ Important: This QR code can only be shared with the wedding couple and related parties.')) {
-                                                        setQrEvent(item)
-                                                    }
-                                                }}
+                                                onClick={() => showConfirm('⚠️ Important: This QR code can only be shared with the wedding couple and related parties.', () => setQrEvent(item))}
                                             >
                                                 <QrIcon />
                                             </button>
@@ -471,6 +481,33 @@ const AdminDashboard = () => {
                                 </button>
                             </div>
                         </form>
+                    </DialogPanel>
+                </div>
+            </Dialog>
+
+            {/* Custom Confirm Dialog */}
+            <Dialog open={confirmDialog.open} onClose={handleConfirmCancel} className="relative z-[60]">
+                <div className="fixed inset-0 bg-black/50" aria-hidden="true" />
+                <div className="fixed inset-0 flex items-center justify-center p-4">
+                    <DialogPanel className="bg-white rounded-2xl w-full max-w-sm shadow-2xl">
+                        <div className="px-6 pt-6 pb-2">
+                            <p className="text-gray-700 text-sm leading-relaxed">{confirmDialog.message}</p>
+                        </div>
+                        <div className="flex gap-3 justify-end px-6 py-4">
+                            <button
+                                onClick={handleConfirmCancel}
+                                className="px-4 py-2 text-sm border border-gray-300 rounded-lg text-gray-600 hover:bg-gray-50 transition-colors"
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                onClick={handleConfirmOk}
+                                className="px-4 py-2 text-sm text-white rounded-lg hover:opacity-90 transition-opacity font-medium"
+                                style={{ backgroundColor: '#5A3E36' }}
+                            >
+                                Confirm
+                            </button>
+                        </div>
                     </DialogPanel>
                 </div>
             </Dialog>
