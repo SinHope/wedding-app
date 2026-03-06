@@ -15,6 +15,9 @@ const Create = ({ setShowModal, fetchEventAndPosts, setUploadStatus, defaultName
     const [suggestions, setSuggestions] = useState([])
     const [loadingSuggestions, setLoadingSuggestions] = useState(false)
 
+    const [showPreview, setShowPreview] = useState(false)
+    const [previewUrls, setPreviewUrls] = useState([])
+
     useEffect(() => {
         if (defaultName) setName(defaultName)
     }, [defaultName])
@@ -114,12 +117,26 @@ const Create = ({ setShowModal, fetchEventAndPosts, setUploadStatus, defaultName
         }
     }
 
-    const submitHandler = async (e) => {
+    const submitHandler = (e) => {
         e.preventDefault()
         if (!name.trim()) { setError('Please enter your name.'); return }
         if (!message.trim()) { setError('Please write a message.'); return }
         if (containsProfanity(message)) { setError('Your message contains inappropriate language. Please keep it respectful.'); return }
+        const urls = files.map(f => ({ url: URL.createObjectURL(f), isVideo: f.type.startsWith('video/') }))
+        setPreviewUrls(urls)
+        setShowPreview(true)
+    }
 
+    const goBackFromPreview = () => {
+        previewUrls.forEach(({ url }) => URL.revokeObjectURL(url))
+        setPreviewUrls([])
+        setShowPreview(false)
+    }
+
+    const confirmSubmit = () => {
+        previewUrls.forEach(({ url }) => URL.revokeObjectURL(url))
+        setPreviewUrls([])
+        setShowPreview(false)
         setShowModal(false)
         setUploadStatus('uploading')
         uploadInBackground(files, name.trim(), message.trim(), event.id)
@@ -154,6 +171,65 @@ const Create = ({ setShowModal, fetchEventAndPosts, setUploadStatus, defaultName
     }
 
     const inputClass = "w-full border border-[#F4D9A9] rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#F4D9A9] focus:border-transparent"
+
+    if (showPreview) {
+        return (
+            <div>
+                <p className="text-center text-sm text-gray-400 mb-4" style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: '1rem' }}>
+                    Your post will look like this
+                </p>
+
+                {/* Post card preview — mirrors EventPage styling */}
+                <div className="rounded-xl overflow-hidden" style={{ border: '1px solid #F4D9A9' }}>
+                    <div className="flex items-center justify-between px-4 py-3 border-b border-[#F4D9A9]">
+                        <strong className="text-gray-800">{name}</strong>
+                        <span className="text-gray-400 text-xs">just now</span>
+                    </div>
+
+                    {previewUrls.length === 1 && (
+                        previewUrls[0].isVideo ? (
+                            <video src={previewUrls[0].url} controls style={{ width: '100%', maxHeight: '320px', objectFit: 'contain', backgroundColor: '#000' }} />
+                        ) : (
+                            <img src={previewUrls[0].url} alt="preview" style={{ width: '100%', maxHeight: '320px', objectFit: 'cover' }} />
+                        )
+                    )}
+
+                    {previewUrls.length > 1 && (
+                        <div className="grid grid-cols-2 gap-0.5 bg-[#F4D9A9]">
+                            {previewUrls.map((p, i) => (
+                                <div key={i} style={{ height: '140px', overflow: 'hidden' }}>
+                                    {p.isVideo
+                                        ? <div className="w-full h-full bg-black flex items-center justify-center text-white text-xs">Video</div>
+                                        : <img src={p.url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                                    }
+                                </div>
+                            ))}
+                        </div>
+                    )}
+
+                    <div className="px-4 py-3">
+                        <p className="text-gray-700 text-sm">{message}</p>
+                    </div>
+                </div>
+
+                <div className="mt-4 flex flex-col gap-2">
+                    <button
+                        onClick={confirmSubmit}
+                        className="w-full py-2.5 rounded-full font-medium text-sm hover:opacity-90 transition-opacity"
+                        style={{ backgroundColor: '#F4D9A9', color: '#5A3E36' }}
+                    >
+                        Confirm & Post
+                    </button>
+                    <button
+                        onClick={goBackFromPreview}
+                        className="w-full py-2 text-sm text-gray-400 hover:text-gray-600 transition-colors"
+                    >
+                        ← Go back and edit
+                    </button>
+                </div>
+            </div>
+        )
+    }
 
     return (
         <div>
