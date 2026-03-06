@@ -133,6 +133,7 @@ const AdminDashboard = () => {
             setEditError('Name and event date are required.')
             return
         }
+        if (!window.confirm('Are you sure you want to save these changes?')) return
         setEditing(true)
 
         let coverUrl = editEvent.cover_image || null
@@ -169,12 +170,13 @@ const AdminDashboard = () => {
 
     const toggleStatus = async (event) => {
         const newStatus = event.status === 'active' ? 'locked' : 'active'
+        if (newStatus === 'locked' && !window.confirm('Are you sure you want to lock this event?')) return
         const { error } = await supabase.from('events').update({ status: newStatus }).eq('id', event.id)
         if (!error) fetchEvents()
     }
 
     const deleteEvent = async (id) => {
-        if (!window.confirm('Delete this event? This will also delete all its posts.')) return
+        if (!window.confirm('Are you sure you want to delete this event? This will also delete all its posts and cannot be undone.')) return
         const { error } = await supabase.from('events').delete().eq('id', id)
         if (!error) fetchEvents()
     }
@@ -321,7 +323,11 @@ const AdminDashboard = () => {
                                             <button
                                                 className="p-1.5 border border-purple-300 rounded text-purple-500 hover:bg-purple-50"
                                                 title="Show QR Code"
-                                                onClick={() => setQrEvent(item)}
+                                                onClick={() => {
+                                                    if (window.confirm('⚠️ Important: This QR code can only be shared with the wedding couple and related parties.')) {
+                                                        setQrEvent(item)
+                                                    }
+                                                }}
                                             >
                                                 <QrIcon />
                                             </button>
