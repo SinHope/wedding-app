@@ -41,6 +41,12 @@ const EventPage = () => {
     const [editPhotos, setEditPhotos] = useState([])
     const [editSaving, setEditSaving] = useState(false)
 
+    // Custom confirm dialog
+    const [confirmDialog, setConfirmDialog] = useState({ open: false, message: '', confirmLabel: 'Confirm', onConfirm: null })
+    const showConfirm = (message, onConfirm, confirmLabel = 'Confirm') => setConfirmDialog({ open: true, message, confirmLabel, onConfirm })
+    const handleConfirmOk = () => { confirmDialog.onConfirm?.(); setConfirmDialog({ open: false, message: '', confirmLabel: 'Confirm', onConfirm: null }) }
+    const handleConfirmCancel = () => setConfirmDialog({ open: false, message: '', confirmLabel: 'Confirm', onConfirm: null })
+
     useEffect(() => {
         document.title = slug
         fetchEventAndPosts()
@@ -112,8 +118,12 @@ const EventPage = () => {
         setEditPhotos(post.photos || [])
     }
 
-    const handleEditSave = async () => {
+    const handleEditSave = () => {
         if (!editPost) return
+        showConfirm('Save your updated post?', doEditSave, 'Yes, Save It')
+    }
+
+    const doEditSave = async () => {
         setEditSaving(true)
         const { error } = await supabase
             .from('posts')
@@ -125,11 +135,12 @@ const EventPage = () => {
         fetchEventAndPosts()
     }
 
-    const handleDeletePost = async (postId) => {
-        if (!window.confirm('Delete this post? This cannot be undone.')) return
-        const { error } = await supabase.from('posts').delete().eq('id', postId)
-        if (error) { console.error(error.message); return }
-        fetchEventAndPosts()
+    const handleDeletePost = (postId) => {
+        showConfirm('Are you sure you want to delete this post? This cannot be undone.', async () => {
+            const { error } = await supabase.from('posts').delete().eq('id', postId)
+            if (error) { console.error(error.message); return }
+            fetchEventAndPosts()
+        })
     }
 
     if (loading) {
@@ -210,8 +221,8 @@ const EventPage = () => {
                                 <button
                                     onClick={handleEditSave}
                                     disabled={editSaving}
-                                    className="w-full py-2 rounded-lg text-white font-medium text-sm hover:opacity-90 disabled:opacity-50"
-                                    style={{ backgroundColor: '#5A3E36' }}
+                                    className="w-full py-2 rounded-lg font-medium text-sm hover:opacity-90 disabled:opacity-50"
+                                    style={{ backgroundColor: '#F4D9A9', color: '#5A3E36' }}
                                 >
                                     {editSaving ? 'Saving...' : 'Save Changes'}
                                 </button>
@@ -220,6 +231,33 @@ const EventPage = () => {
                     </div>
                 </Dialog>
             )}
+
+            {/* Custom Confirm Dialog */}
+            <Dialog open={confirmDialog.open} onClose={handleConfirmCancel} className="relative z-[60]">
+                <div className="fixed inset-0 bg-black/50" aria-hidden="true" />
+                <div className="fixed inset-0 flex items-center justify-center p-4">
+                    <DialogPanel className="bg-white rounded-2xl w-full max-w-sm shadow-2xl">
+                        <div className="px-6 pt-6 pb-2">
+                            <p className="text-gray-700 text-sm leading-relaxed">{confirmDialog.message}</p>
+                        </div>
+                        <div className="flex gap-3 justify-end px-6 py-4">
+                            <button
+                                onClick={handleConfirmCancel}
+                                className="px-4 py-2 text-sm border border-gray-300 rounded-lg text-gray-600 hover:bg-gray-50 transition-colors"
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                onClick={handleConfirmOk}
+                                className="px-4 py-2 text-sm rounded-lg hover:opacity-90 transition-opacity font-medium"
+                                style={{ backgroundColor: '#F4D9A9', color: '#5A3E36' }}
+                            >
+                                {confirmDialog.confirmLabel}
+                            </button>
+                        </div>
+                    </DialogPanel>
+                </div>
+            </Dialog>
 
             {/* Cover image with text overlay */}
             <div className="relative w-full" style={{ height: '480px' }}>
