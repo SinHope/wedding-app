@@ -5,7 +5,7 @@ const BANNED_WORDS = [
     'twat', 'bollocks', 'prick', 'bugger', 'shitty', 'bullshit',
     // Malay offensive words
     'bodoh', 'bangang', 'celaka', 'sial', 'pukimak', 'lancau', 'babi',
-    'anjing', 'kepala bapak', 'pundek', 'kimak'
+    'anjing', 'kepala bapak', 'pundek', 'kimak', 'kanina', 'fucker', 'bastard'
 ]
 
 /**
